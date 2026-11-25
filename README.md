@@ -8,6 +8,8 @@ Aplikasi ini merupakan hasil Real Case Test untuk posisi Senior Programmer di PT
 
 **Alur pelayanan:** Pendaftaran → Antrean dokter → Pemeriksaan → Laboratorium dan/atau farmasi (jika diperlukan) → Tagihan → Pembayaran → Laporan.
 
+Untuk membaca gambaran aplikasi dalam satu dokumen, buka [ringkasan hasil pengerjaan (PDF)](docs/RINGKASAN_HASIL_PENGERJAAN.pdf).
+
 Untuk mencoba aplikasi, ikuti [panduan instalasi](#instalasi-lokal). Jika ingin melihat hasilnya tanpa instalasi, buka [tangkapan layar pelayanan](#bukti-alur-pelayanan) dan [contoh invoice serta kuitansi](#4-hasil-implementasi).
 
 ## Panduan evaluasi hasil pengerjaan
@@ -32,10 +34,14 @@ Database menyimpan data yang digunakan bersama oleh petugas. Misalnya, satu pasi
 | No. | Permintaan | File dan folder | Status |
 |---|---|---|---|
 | 2.1 | Database schema dan relasi antartabel | [Skema SQL](database/schema.sql) · [Penjelasan relasi](docs/ERD.md) | Tersedia |
-| 2.2 | Entity Relationship Diagram (ERD) | [Diagram ERD (SVG)](docs/diagrams/erd.svg) · [Dokumentasi ERD](docs/ERD.md) · [Sumber diagram (DOT)](docs/diagrams/erd.dot) | Tersedia |
+| 2.2 | Entity Relationship Diagram (ERD) | [Diagram ERD (SVG)](docs/diagrams/erd.svg) · [Dokumentasi ERD](docs/ERD.md) · [Physical ERD](docs/diagrams/physical-erd.svg) · [Sumber diagram (DOT)](docs/diagrams/erd.dot) | Tersedia |
 | 2.3 | Migration atau SQL instalasi database | [Empat migration Yii](backend-yii/migrations/) · [Inisialisasi hak akses PostgreSQL](database/init/01-roles.sh) · [Panduan instalasi](#instalasi-lokal) | Tersedia |
 
 ![Diagram hubungan antartabel database](docs/diagrams/erd.svg)
+
+Untuk melihat struktur sampai tingkat kolom, tipe data dan kunci relasi, buka [Physical ERD (SVG)](docs/diagrams/physical-erd.svg) atau [rincian desain database](docs/PHYSICAL_ERD.md). Diagram dapat diperbesar untuk membaca seluruh 24 tabel. Jika diagram penuh terlalu padat, gunakan [diagram per bagian](docs/PHYSICAL_ERD.md#diagram-per-bagian).
+
+[![Physical ERD database SIMRS](docs/diagrams/physical-erd.svg)](docs/diagrams/physical-erd.svg)
 
 Migration adalah file yang membuat atau memperbarui struktur database secara otomatis. Berikut empat migration yang digunakan:
 
