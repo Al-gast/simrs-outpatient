@@ -1,0 +1,64 @@
+{
+  "version": "1.0",
+  "direction": "premium-healthcare-saas",
+  "density": "spacious",
+  "theme": "light",
+  "colors": {
+    "primary": "#0F766E",
+    "primaryHover": "#115E59",
+    "primarySoft": "#F0FDFA",
+    "background": "#F8FAFC",
+    "surface": "#FFFFFF",
+    "border": "#E2E8F0",
+    "controlBorder": "#64748B",
+    "heading": "#0F172A",
+    "text": "#475569",
+    "muted": "#64748B",
+    "success": "#15803D",
+    "successBg": "#DCFCE7",
+    "warning": "#B45309",
+    "warningBg": "#FEF3C7",
+    "info": "#1D4ED8",
+    "infoBg": "#DBEAFE",
+    "danger": "#B91C1C",
+    "dangerBg": "#FEE2E2"
+  },
+  "typography": {
+    "family": "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+    "pageHeading": 28,
+    "sectionHeading": 18,
+    "body": 14,
+    "caption": 12,
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ]
+  },
+  "spacing": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40
+  ],
+  "layout": {
+    "sidebarWidth": 264,
+    "collapsedSidebarWidth": 80,
+    "headerHeight": 72,
+    "contentPadding": 32,
+    "cardPadding": 24,
+    "tableRowMinHeight": 56,
+    "controlHeight": 44,
+    "cardRadius": 16,
+    "controlRadius": 10,
+    "desktopBreakpoint": 1280,
+    "drawerBreakpoint": 1024,
+    "mobileBreakpoint": 640
+  },
+  "shadow": "0 1px 3px rgba(15,23,42,.06)"
+}

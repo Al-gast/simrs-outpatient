@@ -1,0 +1,411 @@
+{
+  "runner": "Newman",
+  "collection": "SIMRS End-to-End",
+  "exit_code": 0,
+  "statistics": {
+    "iterations": {
+      "total": 1,
+      "pending": 0,
+      "failed": 0
+    },
+    "items": {
+      "total": 51,
+      "pending": 0,
+      "failed": 0
+    },
+    "scripts": {
+      "total": 56,
+      "pending": 0,
+      "failed": 0
+    },
+    "prerequests": {
+      "total": 51,
+      "pending": 0,
+      "failed": 0
+    },
+    "requests": {
+      "total": 51,
+      "pending": 0,
+      "failed": 0
+    },
+    "tests": {
+      "total": 51,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 133,
+      "pending": 0,
+      "failed": 0
+    },
+    "testScripts": {
+      "total": 51,
+      "pending": 0,
+      "failed": 0
+    },
+    "prerequestScripts": {
+      "total": 5,
+      "pending": 0,
+      "failed": 0
+    }
+  },
+  "requests": [
+    {
+      "request": "Core readiness",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Node readiness",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Login admin",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Login registration",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Login doctor",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Login pharmacy",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Login laboratory",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Login cashier",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Get server date WIB",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Choose active assigned schedule",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Create dummy patient",
+      "method": "POST",
+      "http_status": 201,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Create e2e_proc",
+      "method": "POST",
+      "http_status": 201,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Create e2e_proc2",
+      "method": "POST",
+      "http_status": 201,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Create e2e_medicine",
+      "method": "POST",
+      "http_status": 201,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Create e2e_labtest",
+      "method": "POST",
+      "http_status": 201,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Initialize dummy stock via adjustment",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Register visit",
+      "method": "POST",
+      "http_status": 201,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Reject duplicate visit",
+      "method": "POST",
+      "http_status": 409,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Start exam",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Save clinical record",
+      "method": "PUT",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Save two procedures",
+      "method": "PUT",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Save prescription",
+      "method": "PUT",
+      "http_status": 200,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Save lab order",
+      "method": "PUT",
+      "http_status": 200,
+      "assertions": 2,
+      "failed": 0
+    },
+    {
+      "request": "Read order through Node",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Record lab result through Node",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Replay same lab event",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Read current clinical state",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Finish exam",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Dispense prescription",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Replay dispense",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Verify stock once",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Read automatic invoice",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 4,
+      "failed": 0
+    },
+    {
+      "request": "Partial cash payment",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Replay partial payment",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Reject changed payment under same key",
+      "method": "POST",
+      "http_status": 409,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Final noncash payment",
+      "method": "POST",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Read paid invoice and receipts",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Reports summary through Node",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Report detail visits",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Report detail clinics",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Report detail procedures",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Report detail revenue",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Report detail medicines",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Report detail payments",
+      "method": "GET",
+      "http_status": 200,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Reject cashier report",
+      "method": "GET",
+      "http_status": 403,
+      "assertions": 3,
+      "failed": 0
+    },
+    {
+      "request": "Logout admin",
+      "method": "POST",
+      "http_status": 204,
+      "assertions": 1,
+      "failed": 0
+    },
+    {
+      "request": "Logout registration",
+      "method": "POST",
+      "http_status": 204,
+      "assertions": 1,
+      "failed": 0
+    },
+    {
+      "request": "Logout doctor",
+      "method": "POST",
+      "http_status": 204,
+      "assertions": 1,
+      "failed": 0
+    },
+    {
+      "request": "Logout pharmacy",
+      "method": "POST",
+      "http_status": 204,
+      "assertions": 1,
+      "failed": 0
+    },
+    {
+      "request": "Logout laboratory",
+      "method": "POST",
+      "http_status": 204,
+      "assertions": 1,
+      "failed": 0
+    },
+    {
+      "request": "Logout cashier",
+      "method": "POST",
+      "http_status": 204,
+      "assertions": 1,
+      "failed": 0
+    }
+  ]
+}

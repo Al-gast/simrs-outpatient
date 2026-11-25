@@ -1,0 +1,8 @@
+{
+  "name": "simrs/outpatient-core",
+  "type": "project",
+  "require": {"php": "^8.3", "yiisoft/yii2": "^2.0.53", "firebase/php-jwt": "^7.2.2"},
+  "replace": {"bower-asset/jquery": "*", "bower-asset/inputmask": "*", "bower-asset/punycode": "*", "bower-asset/yii2-pjax": "*"},
+  "autoload": {"psr-4": {"app\\": ""}},
+  "config": {"allow-plugins": {"yiisoft/yii2-composer": true}, "sort-packages": true}
+}

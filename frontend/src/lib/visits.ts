@@ -1,0 +1,13 @@
+import type {Role} from './roles';
+import {statusColor} from './presentation';
+export const visitStatuses=['waiting','in_exam','services_pending','ready_for_billing','completed'] as const;
+export type VisitStatus=typeof visitStatuses[number];
+export const visitStatus:Record<VisitStatus,{label:string;color:string}>={waiting:{label:'Menunggu',color:statusColor('waiting')},in_exam:{label:'Diperiksa',color:statusColor('in_exam')},services_pending:{label:'Pelayanan penunjang',color:statusColor('services_pending')},ready_for_billing:{label:'Siap pembayaran',color:statusColor('ready_for_billing')},completed:{label:'Selesai',color:statusColor('completed')}};
+export const canMonitorVisits=(role:Role)=>role==='admin';
+export const canRegister=(role:Role)=>role==='registration';
+export const canReadHistory=(role:Role)=>role==='registration'||role==='doctor';
+export const canStartVisit=(role:Role,status:VisitStatus)=>role==='doctor'&&status==='waiting';
+export type Visit={id:string;patient_id:string;doctor_id:string;clinic_id:string;schedule_id:string;visit_date:string;queue_number:number;queue_label:string;registration_fee:string;status:VisitStatus;created_at:string;updated_at:string;patient_name:string;medical_record_no:string;doctor_name:string;clinic_name:string;clinic_code:string;start_time:string;end_time:string};
+export type VisitPage={data:Visit[];meta:{page:number;per_page:number;total:number;today:string;request_id:string}};
+export type VisitFilters={page:number;per_page:number;q?:string;date?:string;status?:VisitStatus;clinic_id?:string;doctor_id?:string};
+export const queueLabel=(code:string,number:number)=>`${code}-${String(number).padStart(3,'0')}`;

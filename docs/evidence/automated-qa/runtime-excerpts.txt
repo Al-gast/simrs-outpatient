@@ -1,0 +1,64 @@
+Selected excerpts from user-supplied actual terminal log; not full raw report.
+
+== 01-env ==
+== 02-compose-config ==
+== 03-build-start ==
+== 03a-start ==
+== 04-service-status ==
+== 05-migration-history ==
+== 05a-migration-down ==
+Migrated down successfully.
+== 05b-migration-up ==
+Migrated up successfully.
+== 06-php-policies ==
+PASS: 72 admin PHP assertions
+PASS: 75 ancillary PHP assertions
+PASS: 77 billing PHP assertions
+PASS: 24 browser session policy assertions
+PASS: 127 clinical policy and validation assertions
+PASS: 143 master policy and validation assertions
+PASS: 36 role combinations + 6 policy/response checks
+PASS: 28 QA PHP assertions
+PASS: 68 visit policy and validation assertions
+== 07-smoke ==
+PASS: admin login, role isolation in both services, logout/revocation
+PASS: registration login, role isolation in both services, logout/revocation
+PASS: doctor login, role isolation in both services, logout/revocation
+PASS: pharmacy login, role isolation in both services, logout/revocation
+PASS: laboratory login, role isolation in both services, logout/revocation
+PASS: cashier login, role isolation in both services, logout/revocation
+PASS: 109 HTTP checks
+== 08-master-smoke ==
+PASS: 161 master API checks; audit and inactive dummy medicine remain intentionally.
+== 09-visit-smoke ==
+PASS: 75 HTTP checks plus data assertions. Fixture clinic V-EA0D5345D8EB; 5 visits kept for audit. Parallel clients used the same seeded registration account; separate HTTP connections.
+== 10-clinical-smoke ==
+PASS: audit action counts; rejected/stale clinical writes did not add audit events.
+PASS: 93 HTTP checks plus assertions. Dummy fixture visit 7; records retained. Pending prescription/lab and cross-doctor history fixtures require Phase 6/user-management testing.
+== 11-ancillary-smoke ==
+PASS: 105 ancillary HTTP checks; concurrency + idempotency scenarios
+== 12-billing-smoke ==
+PASS: 81 HTTP checks plus billing assertions. Dummy data retained.
+== 13-report-admin-smoke ==
+PASS: 73 HTTP checks plus direct SQL comparisons (dummy data)
+== 14-security-smoke ==
+PASS: 41 security boundary HTTP checks including browser session contract (browser behavior requires manual UAT)
+== 15-verify-db-grants ==
+ERROR:  permission denied for schema public
+ERROR:  permission denied for schema public
+ERROR:  permission denied for schema reporting
+PASS: reporting views readable, direct core read/write and DDL denied; core account can read users.
+PASS: ledger append-only permission assertions
+== 16-verify-invariants ==
+PASS: 10 database invariant queries
+== 20-outage ==
+PASS: 106 ancillary HTTP checks; concurrency + idempotency scenarios
+== 21-invariants-after-outage ==
+PASS: 10 database invariant queries
+== 22-query-plans ==
+ Execution Time: 0.192 ms
+ Execution Time: 0.212 ms
+ Execution Time: 0.026 ms
+ Execution Time: 0.111 ms
+ Execution Time: 0.040 ms
+ Execution Time: 0.117 ms

@@ -1,0 +1,55 @@
+Phase 7 actual dependency-free verification
+No syntax errors detected in backend-yii/migrations/m261124_000001_foundation.php
+No syntax errors detected in backend-yii/services/BillingService.php
+No syntax errors detected in backend-yii/services/VisitService.php
+No syntax errors detected in backend-yii/services/ClinicalService.php
+No syntax errors detected in backend-yii/services/MasterService.php
+No syntax errors detected in backend-yii/services/AuthService.php
+No syntax errors detected in backend-yii/services/AncillaryService.php
+No syntax errors detected in backend-yii/commands/SeedController.php
+No syntax errors detected in backend-yii/components/RolePolicy.php
+No syntax errors detected in backend-yii/components/ApiErrorHandler.php
+No syntax errors detected in backend-yii/components/VisitPolicy.php
+No syntax errors detected in backend-yii/components/ApiException.php
+No syntax errors detected in backend-yii/components/Api.php
+No syntax errors detected in backend-yii/components/ClinicalPolicy.php
+No syntax errors detected in backend-yii/components/BillingPolicy.php
+No syntax errors detected in backend-yii/components/AncillaryPolicy.php
+No syntax errors detected in backend-yii/components/MasterPolicy.php
+No syntax errors detected in backend-yii/tests/policy.php
+No syntax errors detected in backend-yii/tests/clinical-policy.php
+No syntax errors detected in backend-yii/tests/master-policy.php
+No syntax errors detected in backend-yii/tests/visit-policy.php
+No syntax errors detected in backend-yii/tests/ancillary-policy.php
+No syntax errors detected in backend-yii/tests/billing-policy.php
+No syntax errors detected in backend-yii/controllers/MasterController.php
+No syntax errors detected in backend-yii/controllers/SystemController.php
+No syntax errors detected in backend-yii/controllers/BaseController.php
+No syntax errors detected in backend-yii/controllers/AuthController.php
+No syntax errors detected in backend-yii/controllers/ClinicalController.php
+No syntax errors detected in backend-yii/controllers/BillingController.php
+No syntax errors detected in backend-yii/controllers/VisitController.php
+No syntax errors detected in backend-yii/controllers/AncillaryController.php
+No syntax errors detected in backend-yii/config/console.php
+No syntax errors detected in backend-yii/config/db.php
+No syntax errors detected in backend-yii/config/web.php
+No syntax errors detected in backend-yii/bootstrap.php
+No syntax errors detected in backend-yii/web/index.php
+No syntax errors detected in backend-yii/yii
+PASS: 36 role combinations + 6 policy/response checks
+PASS: 133 master policy and validation assertions
+PASS: 68 visit policy and validation assertions
+PASS: 124 clinical policy and validation assertions
+PASS: 74 ancillary PHP assertions
+PASS: 77 billing PHP assertions
+PASS: shell syntax
+PASS: 224 TypeScript policy assertions
+PASS: 58 clinical TypeScript assertions
+PASS: 33 ancillary TypeScript assertions
+PASS: 32 billing TypeScript assertions
+PASS: 29 TypeScript/TSX files transpiled (syntax only)
+PASS: JSON, Python AST and YAML parsing
+PASS: billing route/controller wiring, schema and sequence references, separate advisory lock namespace, automatic issue hooks (static inspection)
+PASS: no deleted Phase 6 files; schema, migration, design tokens and dependencies unchanged
+
+Not executed: Docker, PostgreSQL, full project typecheck, application build, HTTP smoke, Postman and browser print.

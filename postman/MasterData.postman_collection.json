@@ -1,0 +1,424 @@
+{
+  "info": {
+    "name": "SIMRS Phase 3 Master Data",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run with existing SIMRS environment and dummy prefix. Read-only and rejected write probes; master-smoke.py performs CRUD and concurrency."
+  },
+  "item": [
+    {
+      "name": "Admin login",
+      "request": {
+        "method": "POST",
+        "url": "{{core_url}}/auth/login",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"admin\", \"password\": \"{{demo_prefix}}-admin\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "if(pm.response.code===200) pm.collectionVariables.set(\"master_token\",pm.response.json().data.access_token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List patients",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/patients?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List medical-staff",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/medical-staff?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List clinics",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/clinics?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List doctor-schedules",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/doctor-schedules?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List procedures",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/procedures?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List medicines",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/medicines?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "List lab-tests",
+      "request": {
+        "method": "GET",
+        "url": "{{core_url}}/master/lab-tests?page=1&per_page=2",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Paginated data\",()=>{const j=pm.response.json();pm.expect(j.data).to.be.an(\"array\");pm.expect(j.meta.per_page).to.eql(2);});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject direct stock write",
+      "request": {
+        "method": "POST",
+        "url": "{{core_url}}/master/medicines",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"INVALID\", \"name\": \"Invalid\", \"unit\": \"tablet\", \"price\": \"1000\", \"stock\": 100}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject wrong price type",
+      "request": {
+        "method": "POST",
+        "url": "{{core_url}}/master/clinics",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"INVALID\", \"name\": \"Invalid\", \"registration_fee\": 1000}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 422\", () => pm.response.to.have.status(422));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "url": "{{core_url}}/auth/logout",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{master_token}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));",
+              "pm.collectionVariables.unset(\"master_token\");"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,177 @@
+v1.1.0 release candidate — actual authoring checks
+Tue Nov 24 17:16:26 UTC 2026
+PHP 8.4.24 (cli) (built: Jul 31 2026 05:11:11) (NTS)
+v22.16.0
+Version 5.8.3
+=== dependency-free static and policy regression ===
+No syntax errors detected in backend-yii/migrations/m261124_000001_foundation.php
+No syntax errors detected in backend-yii/migrations/m261124_000002_reporting_indexes.php
+No syntax errors detected in backend-yii/migrations/m261124_000003_qa_hardening.php
+No syntax errors detected in backend-yii/migrations/m261124_000004_master_codes.php
+No syntax errors detected in backend-yii/services/BillingService.php
+No syntax errors detected in backend-yii/services/AdminService.php
+No syntax errors detected in backend-yii/services/VisitService.php
+No syntax errors detected in backend-yii/services/ClinicalService.php
+No syntax errors detected in backend-yii/services/MasterService.php
+No syntax errors detected in backend-yii/services/AuthService.php
+No syntax errors detected in backend-yii/services/AncillaryService.php
+No syntax errors detected in backend-yii/commands/SeedController.php
+No syntax errors detected in backend-yii/components/AdminPolicy.php
+No syntax errors detected in backend-yii/components/RolePolicy.php
+No syntax errors detected in backend-yii/components/ApiErrorHandler.php
+No syntax errors detected in backend-yii/components/VisitPolicy.php
+No syntax errors detected in backend-yii/components/ApiException.php
+No syntax errors detected in backend-yii/components/Api.php
+No syntax errors detected in backend-yii/components/BrowserSessionPolicy.php
+No syntax errors detected in backend-yii/components/ClinicalPolicy.php
+No syntax errors detected in backend-yii/components/BillingPolicy.php
+No syntax errors detected in backend-yii/components/AncillaryPolicy.php
+No syntax errors detected in backend-yii/components/MasterPolicy.php
+No syntax errors detected in backend-yii/tests/policy.php
+No syntax errors detected in backend-yii/tests/browser-session-policy.php
+No syntax errors detected in backend-yii/tests/clinical-policy.php
+No syntax errors detected in backend-yii/tests/qa-policy.php
+No syntax errors detected in backend-yii/tests/master-policy.php
+No syntax errors detected in backend-yii/tests/admin-policy.php
+No syntax errors detected in backend-yii/tests/visit-policy.php
+No syntax errors detected in backend-yii/tests/ancillary-policy.php
+No syntax errors detected in backend-yii/tests/billing-policy.php
+No syntax errors detected in backend-yii/controllers/MasterController.php
+No syntax errors detected in backend-yii/controllers/SystemController.php
+No syntax errors detected in backend-yii/controllers/BaseController.php
+No syntax errors detected in backend-yii/controllers/AdminController.php
+No syntax errors detected in backend-yii/controllers/AuthController.php
+No syntax errors detected in backend-yii/controllers/ClinicalController.php
+No syntax errors detected in backend-yii/controllers/BillingController.php
+No syntax errors detected in backend-yii/controllers/VisitController.php
+No syntax errors detected in backend-yii/controllers/AncillaryController.php
+No syntax errors detected in backend-yii/config/console.php
+No syntax errors detected in backend-yii/config/db.php
+No syntax errors detected in backend-yii/config/web.php
+No syntax errors detected in backend-yii/bootstrap.php
+No syntax errors detected in backend-yii/web/index.php
+No syntax errors detected in backend-yii/yii
+PASS: 36 role combinations + 6 policy/response checks
+PASS: 143 master policy and validation assertions
+PASS: 68 visit policy and validation assertions
+PASS: 127 clinical policy and validation assertions
+PASS: 75 ancillary PHP assertions
+PASS: 77 billing PHP assertions
+PASS: 72 admin PHP assertions
+PASS: 28 QA PHP assertions
+PASS: 24 browser session policy assertions
+PASS: shell syntax
+PASS: 224 TypeScript policy assertions
+PASS: 58 clinical TypeScript assertions
+PASS: 33 ancillary TypeScript assertions
+PASS: 32 billing TypeScript assertions
+PASS: 56 reporting/admin TypeScript assertions
+PASS: 8 QA billing input assertions
+PASS: 88 presentation assertions
+PASS: 284 workflow and dedicated-route assertions
+PASS: 12 print DOM-double assertions (not visual/print runtime)
+PASS: 93 dashboard/account/audit presentation assertions
+PASS: 10 browser generation assertions
+PASS: 47 TypeScript/TSX syntax files, 0 errors
+=== collection/route and syntax validation ===
+PASS: Ancillary.postman_collection.json
+PASS: Billing.postman_collection.json
+PASS: Clinical.postman_collection.json
+PASS: End-to-End.postman_collection.json
+PASS: MasterData.postman_collection.json
+PASS: QA-Hardening.postman_collection.json
+PASS: Reporting-Admin.postman_collection.json
+PASS: SIMRS.postman_collection.json
+PASS: Visits.postman_collection.json
+PASS: 192 Postman request method/path mappings, 198 JavaScript event syntax checks; no HTTP execution
+PASS: Python AST and JSON parsing
+=== isolated QA dry-run (no HTTP/database) ===
+Isolated copy -> new .env -> Compose build + migrations + seed -> readiness -> integration stages -> query plans -> isolated cleanup
+python3 scripts/smoke.py
+python3 scripts/master-smoke.py
+python3 scripts/visit-smoke.py
+python3 scripts/clinical-smoke.py --db-check
+python3 scripts/ancillary-smoke.py --db-check
+python3 scripts/billing-smoke.py --db-check
+python3 scripts/report-admin-smoke.py
+python3 scripts/security-smoke.py
+sh scripts/verify-db-grants.sh
+sh scripts/verify-invariants.sh
+python3 scripts/ancillary-smoke.py --db-check --outage (then wait for recovery)
+Migration rollback/reapply on fresh seeded dummy DB before integration tests
+=== attempted dependency-based build/test (not passed) ===
+--- frontend ---
+
+> simrs-outpatient-web@1.1.0 build
+> tsc --noEmit && vite build
+
+error TS2688: Cannot find type definition file for 'vite/client'.
+  The file is in the program because:
+    Entry point of type library 'vite/client' specified in compilerOptions
+build exit=2
+
+> simrs-outpatient-web@1.1.0 test
+> vitest run
+
+sh: 1: vitest: not found
+test exit=127
+--- backend-node ---
+
+> simrs-supporting-api@1.1.0 build
+> tsc -p tsconfig.json
+
+src/api.ts(1,26): error TS2307: Cannot find module 'node:crypto' or its corresponding type declarations.
+src/api.ts(2,89): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/api.ts(7,48): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/api.ts(7,52): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/api.ts(7,56): error TS7006: Parameter 'next' implicitly has an 'any' type.
+src/api.ts(14,114): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/api.ts(14,118): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/api.ts(14,122): error TS7006: Parameter 'next' implicitly has an 'any' type.
+src/api.ts(15,39): error TS7006: Parameter '_req' implicitly has an 'any' type.
+src/api.ts(15,44): error TS7006: Parameter '_res' implicitly has an 'any' type.
+src/api.ts(15,49): error TS7006: Parameter 'next' implicitly has an 'any' type.
+src/api.ts(16,62): error TS7006: Parameter '_req' implicitly has an 'any' type.
+src/api.ts(16,67): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/api.ts(16,71): error TS7006: Parameter 'next' implicitly has an 'any' type.
+src/auth.ts(1,35): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/auth.ts(2,17): error TS2307: Cannot find module 'zod' or its corresponding type declarations.
+src/index.ts(1,21): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/index.ts(2,18): error TS2307: Cannot find module 'cors' or its corresponding type declarations.
+src/index.ts(3,16): error TS2307: Cannot find module 'pg' or its corresponding type declarations.
+src/index.ts(4,17): error TS2307: Cannot find module 'zod' or its corresponding type declarations.
+src/index.ts(10,250): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/index.ts(15,10): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/index.ts(15,14): error TS7006: Parameter '_res' implicitly has an 'any' type.
+src/index.ts(15,19): error TS7006: Parameter 'next' implicitly has an 'any' type.
+src/index.ts(16,23): error TS7006: Parameter 'origin' implicitly has an 'any' type.
+src/index.ts(16,30): error TS7006: Parameter 'cb' implicitly has an 'any' type.
+src/index.ts(29,5): error TS7006: Parameter 'req' implicitly has an 'any' type.
+src/index.ts(29,9): error TS7006: Parameter 'res' implicitly has an 'any' type.
+src/index.ts(34,51): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/index.ts(34,120): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/index.ts(34,155): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/index.ts(34,177): error TS2339: Property 'unref' does not exist on type 'number'.
+src/laboratory.ts(1,28): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/laboratory.ts(2,17): error TS2307: Cannot find module 'zod' or its corresponding type declarations.
+src/laboratory.ts(5,67): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/laboratory.ts(6,117): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/laboratory.ts(7,65): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/laboratory.ts(7,68): error TS2580: Cannot find name 'Buffer'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/laboratory.ts(7,132): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/laboratory.ts(7,188): error TS7006: Parameter 'v' implicitly has an 'any' type.
+src/reporting.ts(1,28): error TS2307: Cannot find module 'express' or its corresponding type declarations.
+src/reporting.ts(2,36): error TS2307: Cannot find module 'pg' or its corresponding type declarations.
+build exit=2
+
+> simrs-supporting-api@1.1.0 test
+> vitest run
+
+sh: 1: vitest: not found
+test exit=127
+=== runtime tooling ===
+docker unavailable
+composer unavailable
+psql unavailable
+
+PASS: schema, migration, Compose and Postman JSON byte-identical to v1.0.4

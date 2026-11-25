@@ -1,0 +1,28 @@
+No syntax errors detected in backend-yii/migrations/m261124_000001_foundation.php
+No syntax errors detected in backend-yii/services/MasterService.php
+No syntax errors detected in backend-yii/services/AuthService.php
+No syntax errors detected in backend-yii/commands/SeedController.php
+No syntax errors detected in backend-yii/components/RolePolicy.php
+No syntax errors detected in backend-yii/components/ApiErrorHandler.php
+No syntax errors detected in backend-yii/components/ApiException.php
+No syntax errors detected in backend-yii/components/Api.php
+No syntax errors detected in backend-yii/components/MasterPolicy.php
+No syntax errors detected in backend-yii/tests/policy.php
+No syntax errors detected in backend-yii/tests/master-policy.php
+No syntax errors detected in backend-yii/controllers/MasterController.php
+No syntax errors detected in backend-yii/controllers/SystemController.php
+No syntax errors detected in backend-yii/controllers/BaseController.php
+No syntax errors detected in backend-yii/controllers/AuthController.php
+No syntax errors detected in backend-yii/config/console.php
+No syntax errors detected in backend-yii/config/db.php
+No syntax errors detected in backend-yii/config/web.php
+No syntax errors detected in backend-yii/bootstrap.php
+No syntax errors detected in backend-yii/web/index.php
+No syntax errors detected in backend-yii/yii
+PASS: 36 role combinations + 6 policy/response checks
+PASS: 133 master policy and validation assertions
+PASS: shell syntax
+PASS: 174 TypeScript policy assertions
+PASS: 18 TypeScript syntax/transpile checks (not full typecheck)
+PASS: JSON and Python syntax
+PASS: Compose YAML parse and workers config (not docker compose validation)

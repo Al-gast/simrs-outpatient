@@ -1,0 +1,103 @@
+SIMRS v1.1.0 - Postman Collection Execution
+01. Core readiness | HTTP 200 | Assertions: 3 | Failed: 0
+02. Node readiness | HTTP 200 | Assertions: 3 | Failed: 0
+03. Login admin | HTTP 200 | Assertions: 3 | Failed: 0
+04. Login registration | HTTP 200 | Assertions: 3 | Failed: 0
+05. Login doctor | HTTP 200 | Assertions: 3 | Failed: 0
+06. Login pharmacy | HTTP 200 | Assertions: 3 | Failed: 0
+07. Login laboratory | HTTP 200 | Assertions: 3 | Failed: 0
+08. Login cashier | HTTP 200 | Assertions: 3 | Failed: 0
+09. Get server date WIB | HTTP 200 | Assertions: 2 | Failed: 0
+10. Choose active assigned schedule | HTTP 200 | Assertions: 2 | Failed: 0
+11. Create dummy patient | HTTP 201 | Assertions: 2 | Failed: 0
+12. Create e2e_proc | HTTP 201 | Assertions: 2 | Failed: 0
+13. Create e2e_proc2 | HTTP 201 | Assertions: 2 | Failed: 0
+14. Create e2e_medicine | HTTP 201 | Assertions: 2 | Failed: 0
+15. Create e2e_labtest | HTTP 201 | Assertions: 2 | Failed: 0
+16. Initialize dummy stock via adjustment | HTTP 200 | Assertions: 3 | Failed: 0
+17. Register visit | HTTP 201 | Assertions: 3 | Failed: 0
+18. Reject duplicate visit | HTTP 409 | Assertions: 3 | Failed: 0
+19. Start exam | HTTP 200 | Assertions: 3 | Failed: 0
+20. Save clinical record | HTTP 200 | Assertions: 3 | Failed: 0
+21. Save two procedures | HTTP 200 | Assertions: 3 | Failed: 0
+22. Save prescription | HTTP 200 | Assertions: 2 | Failed: 0
+23. Save lab order | HTTP 200 | Assertions: 2 | Failed: 0
+24. Read order through Node | HTTP 200 | Assertions: 3 | Failed: 0
+25. Record lab result through Node | HTTP 200 | Assertions: 3 | Failed: 0
+26. Replay same lab event | HTTP 200 | Assertions: 3 | Failed: 0
+27. Read current clinical state | HTTP 200 | Assertions: 3 | Failed: 0
+28. Finish exam | HTTP 200 | Assertions: 3 | Failed: 0
+29. Dispense prescription | HTTP 200 | Assertions: 3 | Failed: 0
+30. Replay dispense | HTTP 200 | Assertions: 3 | Failed: 0
+31. Verify stock once | HTTP 200 | Assertions: 3 | Failed: 0
+32. Read automatic invoice | HTTP 200 | Assertions: 4 | Failed: 0
+33. Partial cash payment | HTTP 200 | Assertions: 3 | Failed: 0
+34. Replay partial payment | HTTP 200 | Assertions: 3 | Failed: 0
+35. Reject changed payment under same key | HTTP 409 | Assertions: 3 | Failed: 0
+36. Final noncash payment | HTTP 200 | Assertions: 3 | Failed: 0
+37. Read paid invoice and receipts | HTTP 200 | Assertions: 3 | Failed: 0
+38. Reports summary through Node | HTTP 200 | Assertions: 3 | Failed: 0
+39. Report detail visits | HTTP 200 | Assertions: 3 | Failed: 0
+40. Report detail clinics | HTTP 200 | Assertions: 3 | Failed: 0
+41. Report detail procedures | HTTP 200 | Assertions: 3 | Failed: 0
+42. Report detail revenue | HTTP 200 | Assertions: 3 | Failed: 0
+43. Report detail medicines | HTTP 200 | Assertions: 3 | Failed: 0
+44. Report detail payments | HTTP 200 | Assertions: 3 | Failed: 0
+45. Reject cashier report | HTTP 403 | Assertions: 3 | Failed: 0
+46. Logout admin | HTTP 204 | Assertions: 1 | Failed: 0
+47. Logout registration | HTTP 204 | Assertions: 1 | Failed: 0
+48. Logout doctor | HTTP 204 | Assertions: 1 | Failed: 0
+49. Logout pharmacy | HTTP 204 | Assertions: 1 | Failed: 0
+50. Logout laboratory | HTTP 204 | Assertions: 1 | Failed: 0
+51. Logout cashier | HTTP 204 | Assertions: 1 | Failed: 0
+
+{
+  "iterations": {
+    "total": 1,
+    "pending": 0,
+    "failed": 0
+  },
+  "items": {
+    "total": 51,
+    "pending": 0,
+    "failed": 0
+  },
+  "scripts": {
+    "total": 56,
+    "pending": 0,
+    "failed": 0
+  },
+  "prerequests": {
+    "total": 51,
+    "pending": 0,
+    "failed": 0
+  },
+  "requests": {
+    "total": 51,
+    "pending": 0,
+    "failed": 0
+  },
+  "tests": {
+    "total": 51,
+    "pending": 0,
+    "failed": 0
+  },
+  "assertions": {
+    "total": 133,
+    "pending": 0,
+    "failed": 0
+  },
+  "testScripts": {
+    "total": 51,
+    "pending": 0,
+    "failed": 0
+  },
+  "prerequestScripts": {
+    "total": 5,
+    "pending": 0,
+    "failed": 0
+  }
+}
+Executed requests: 51/51
+Exit code: 0
+RESULT: PASS

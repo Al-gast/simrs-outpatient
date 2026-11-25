@@ -1,0 +1,113 @@
+No syntax errors detected in backend-yii/migrations/m261124_000001_foundation.php
+No syntax errors detected in backend-yii/migrations/m261124_000002_reporting_indexes.php
+No syntax errors detected in backend-yii/migrations/m261124_000003_qa_hardening.php
+No syntax errors detected in backend-yii/migrations/m261124_000004_master_codes.php
+No syntax errors detected in backend-yii/services/BillingService.php
+No syntax errors detected in backend-yii/services/AdminService.php
+No syntax errors detected in backend-yii/services/VisitService.php
+No syntax errors detected in backend-yii/services/ClinicalService.php
+No syntax errors detected in backend-yii/services/MasterService.php
+No syntax errors detected in backend-yii/services/AuthService.php
+No syntax errors detected in backend-yii/services/AncillaryService.php
+No syntax errors detected in backend-yii/commands/SeedController.php
+No syntax errors detected in backend-yii/components/AdminPolicy.php
+No syntax errors detected in backend-yii/components/RolePolicy.php
+No syntax errors detected in backend-yii/components/ApiErrorHandler.php
+No syntax errors detected in backend-yii/components/VisitPolicy.php
+No syntax errors detected in backend-yii/components/ApiException.php
+No syntax errors detected in backend-yii/components/Api.php
+No syntax errors detected in backend-yii/components/BrowserSessionPolicy.php
+No syntax errors detected in backend-yii/components/ClinicalPolicy.php
+No syntax errors detected in backend-yii/components/BillingPolicy.php
+No syntax errors detected in backend-yii/components/AncillaryPolicy.php
+No syntax errors detected in backend-yii/components/MasterPolicy.php
+No syntax errors detected in backend-yii/tests/policy.php
+No syntax errors detected in backend-yii/tests/browser-session-policy.php
+No syntax errors detected in backend-yii/tests/clinical-policy.php
+No syntax errors detected in backend-yii/tests/qa-policy.php
+No syntax errors detected in backend-yii/tests/master-policy.php
+No syntax errors detected in backend-yii/tests/admin-policy.php
+No syntax errors detected in backend-yii/tests/visit-policy.php
+No syntax errors detected in backend-yii/tests/ancillary-policy.php
+No syntax errors detected in backend-yii/tests/billing-policy.php
+No syntax errors detected in backend-yii/controllers/MasterController.php
+No syntax errors detected in backend-yii/controllers/SystemController.php
+No syntax errors detected in backend-yii/controllers/BaseController.php
+No syntax errors detected in backend-yii/controllers/AdminController.php
+No syntax errors detected in backend-yii/controllers/AuthController.php
+No syntax errors detected in backend-yii/controllers/ClinicalController.php
+No syntax errors detected in backend-yii/controllers/BillingController.php
+No syntax errors detected in backend-yii/controllers/VisitController.php
+No syntax errors detected in backend-yii/controllers/AncillaryController.php
+No syntax errors detected in backend-yii/config/console.php
+No syntax errors detected in backend-yii/config/db.php
+No syntax errors detected in backend-yii/config/web.php
+No syntax errors detected in backend-yii/bootstrap.php
+No syntax errors detected in backend-yii/web/index.php
+No syntax errors detected in backend-yii/yii
+PASS: 36 role combinations + 6 policy/response checks
+PASS: 143 master policy and validation assertions
+PASS: 68 visit policy and validation assertions
+PASS: 127 clinical policy and validation assertions
+PASS: 75 ancillary PHP assertions
+PASS: 77 billing PHP assertions
+PASS: 72 admin PHP assertions
+PASS: 28 QA PHP assertions
+PASS: 18 browser session policy assertions
+PASS: shell syntax
+PASS: 224 TypeScript policy assertions
+PASS: 58 clinical TypeScript assertions
+PASS: 33 ancillary TypeScript assertions
+PASS: 32 billing TypeScript assertions
+PASS: 56 reporting/admin TypeScript assertions
+PASS: 8 QA billing input assertions
+PASS: 88 presentation assertions
+PASS: 39 TypeScript/TSX syntax files, 0 errors
+PASS: 17 JSON files parse
+PASS: 9 Python files parse
+PASS: 1 YAML files parse
+PASS: CSS token/rule/declaration parse (not a browser layout test)
+PASS: source compare against original v1.0.1 archive; 20 modified, 5 added, 0 removed; backend/DB/Postman/Compose/API/session/RBAC catalog byte-identical
+Modified: README.md, docs/QA_MANUAL_CHECKLIST.md, docs/TESTING.md, docs/UAT_BACKLOG.md, frontend/package.json, frontend/src/components/Shell.tsx, frontend/src/lib/billing.ts, frontend/src/lib/visits.ts, frontend/src/main.tsx, frontend/src/pages/Admin.tsx, frontend/src/pages/AncillaryEditor.tsx, frontend/src/pages/AncillaryQueue.tsx, frontend/src/pages/Billing.tsx, frontend/src/pages/Clinical.tsx, frontend/src/pages/MasterData.tsx, frontend/src/pages/Reports.tsx, frontend/src/pages/Visits.tsx, frontend/src/styles.css, scripts/check-policy.cjs, scripts/check-static.sh
+Added: docs/V1.0.2_NOTES.md, docs/evidence/v1.0.2-static-checks.txt, frontend/src/components/Ui.tsx, frontend/src/lib/presentation.ts, frontend/tests/presentation.test.ts
+PASS: no local .env, installed dependencies, git metadata, QA run folders or generated lockfiles included
+PASS: release documentation references resolve
+
+=== QA dry-run (no runtime) ===
+Isolated copy -> new .env -> Compose build + migrations + seed -> readiness -> integration stages -> query plans -> isolated cleanup
+python3 scripts/smoke.py
+python3 scripts/master-smoke.py
+python3 scripts/visit-smoke.py
+python3 scripts/clinical-smoke.py --db-check
+python3 scripts/ancillary-smoke.py --db-check
+python3 scripts/billing-smoke.py --db-check
+python3 scripts/report-admin-smoke.py
+python3 scripts/security-smoke.py
+sh scripts/verify-db-grants.sh
+sh scripts/verify-invariants.sh
+python3 scripts/ancillary-smoke.py --db-check --outage (then wait for recovery)
+Migration rollback/reapply on fresh seeded dummy DB before integration tests
+dry-run exit: 0
+
+=== Full frontend build attempt (dependencies not installed) ===
+
+> simrs-outpatient-web@1.0.2 build
+> tsc --noEmit && vite build
+
+error TS2688: Cannot find type definition file for 'vite/client'.
+  The file is in the program because:
+    Entry point of type library 'vite/client' specified in compilerOptions
+build exit: 2 (blocked; NOT PASS)
+
+=== Package-based Vitest attempt ===
+
+> simrs-outpatient-web@1.0.2 test
+> vitest run
+
+sh: 1: vitest: not found
+vitest exit: 127 (blocked; NOT PASS)
+
+=== Runtime tools ===
+docker: unavailable
+composer: unavailable
+psql: unavailable

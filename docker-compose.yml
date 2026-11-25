@@ -1,0 +1,80 @@
+name: simrs-outpatient
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: simrs
+      POSTGRES_USER: simrs_owner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/setup-env.sh}
+      CORE_DB_PASSWORD: ${CORE_DB_PASSWORD:?run scripts/setup-env.sh}
+      REPORT_DB_PASSWORD: ${REPORT_DB_PASSWORD:?run scripts/setup-env.sh}
+      TZ: Asia/Jakarta
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -h 127.0.0.1 -U simrs_owner -d simrs']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  migrate:
+    build:
+      context: .
+      dockerfile: backend-yii/Dockerfile
+    environment:
+      DB_DSN: pgsql:host=db;port=5432;dbname=simrs
+      DB_USER: simrs_owner
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/setup-env.sh}
+      DEMO_PASSWORD_PREFIX: ${DEMO_PASSWORD_PREFIX:?run scripts/setup-env.sh}
+    command: [sh, -c, 'php yii migrate --interactive=0 && php yii seed/index']
+    depends_on:
+      db:
+        condition: service_healthy
+  yii:
+    build:
+      context: .
+      dockerfile: backend-yii/Dockerfile
+    environment:
+      DB_DSN: pgsql:host=db;port=5432;dbname=simrs
+      DB_USER: simrs_core
+      DB_PASSWORD: ${CORE_DB_PASSWORD:?run scripts/setup-env.sh}
+      JWT_SECRET: ${JWT_SECRET:?run scripts/setup-env.sh}
+      PHP_CLI_SERVER_WORKERS: '4' # local concurrent request testing only
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+    ports: ['127.0.0.1:8080:8080']
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: [CMD, php, -r, 'exit(@file_get_contents("http://127.0.0.1:8080/api/v1/health") === false ? 1 : 0);']
+      interval: 10s
+      timeout: 4s
+      retries: 12
+  node:
+    build: ./backend-node
+    environment:
+      DB_HOST: db
+      DB_PORT: '5432'
+      DB_NAME: simrs
+      DB_USER: simrs_report
+      DB_PASSWORD: ${REPORT_DB_PASSWORD:?run scripts/setup-env.sh}
+      CORE_URL: http://yii:8080/api/v1
+      FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+    ports: ['127.0.0.1:3001:3001']
+    depends_on:
+      yii:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, 'fetch("http://127.0.0.1:3001/api/v1/health").then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+  frontend:
+    build: ./frontend
+    ports: ['127.0.0.1:3000:3000']
+    # UI can load even when Node is offline; service health is displayed independently.
+    depends_on:
+      yii:
+        condition: service_healthy
+volumes:
+  pgdata:

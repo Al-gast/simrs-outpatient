@@ -1,0 +1,2488 @@
+{
+  "info": {
+    "name": "SIMRS v1.0.0 — End-to-End Dummy Visit",
+    "description": "Run once, sequentially, on disposable dummy DB only. Creates permanent dummy patient, masters, visit, payments. No runtime proof until executed. On error inspect before repeating any payment. Keys generated only in first attempt requests; manually preserve original key/payload on ambiguous response. Do not export tokens.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "e2e_admin",
+      "value": ""
+    },
+    {
+      "key": "e2e_balance",
+      "value": ""
+    },
+    {
+      "key": "e2e_cashier",
+      "value": ""
+    },
+    {
+      "key": "e2e_doctor",
+      "value": ""
+    },
+    {
+      "key": "e2e_labitem",
+      "value": ""
+    },
+    {
+      "key": "e2e_labkey",
+      "value": ""
+    },
+    {
+      "key": "e2e_laboratory",
+      "value": ""
+    },
+    {
+      "key": "e2e_laborder",
+      "value": ""
+    },
+    {
+      "key": "e2e_labtest",
+      "value": ""
+    },
+    {
+      "key": "e2e_lastkey",
+      "value": ""
+    },
+    {
+      "key": "e2e_medicine",
+      "value": ""
+    },
+    {
+      "key": "e2e_patient",
+      "value": ""
+    },
+    {
+      "key": "e2e_paykey",
+      "value": ""
+    },
+    {
+      "key": "e2e_payment",
+      "value": ""
+    },
+    {
+      "key": "e2e_pharmacy",
+      "value": ""
+    },
+    {
+      "key": "e2e_proc",
+      "value": ""
+    },
+    {
+      "key": "e2e_proc2",
+      "value": ""
+    },
+    {
+      "key": "e2e_registration",
+      "value": ""
+    },
+    {
+      "key": "e2e_registration_fee",
+      "value": ""
+    },
+    {
+      "key": "e2e_revision",
+      "value": ""
+    },
+    {
+      "key": "e2e_run",
+      "value": ""
+    },
+    {
+      "key": "e2e_rx",
+      "value": ""
+    },
+    {
+      "key": "e2e_schedule",
+      "value": ""
+    },
+    {
+      "key": "e2e_staff",
+      "value": ""
+    },
+    {
+      "key": "e2e_stockkey",
+      "value": ""
+    },
+    {
+      "key": "e2e_today",
+      "value": ""
+    },
+    {
+      "key": "e2e_version",
+      "value": ""
+    },
+    {
+      "key": "e2e_visit",
+      "value": ""
+    },
+    {
+      "key": "e2e_weekday",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Core readiness",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/health",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Core ready\",()=>pm.expect(d.status===\"ready\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Node readiness",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/health",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Node ready\",()=>pm.expect(d.status===\"ready\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"admin\", \"password\": \"{{demo_prefix}}-admin\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Correct role\",()=>pm.expect(d.user.role===\"admin\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_admin\",String(d.access_token));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login registration",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"registration\", \"password\": \"{{demo_prefix}}-registration\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Correct role\",()=>pm.expect(d.user.role===\"registration\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_registration\",String(d.access_token));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login doctor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"doctor\", \"password\": \"{{demo_prefix}}-doctor\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Correct role\",()=>pm.expect(d.user.role===\"doctor\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_doctor\",String(d.access_token));",
+              "pm.collectionVariables.set(\"e2e_staff\",String(d.user.staff_id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login pharmacy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"pharmacy\", \"password\": \"{{demo_prefix}}-pharmacy\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Correct role\",()=>pm.expect(d.user.role===\"pharmacy\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_pharmacy\",String(d.access_token));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login laboratory",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"laboratory\", \"password\": \"{{demo_prefix}}-laboratory\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Correct role\",()=>pm.expect(d.user.role===\"laboratory\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_laboratory\",String(d.access_token));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login cashier",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"cashier\", \"password\": \"{{demo_prefix}}-cashier\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Correct role\",()=>pm.expect(d.user.role===\"cashier\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_cashier\",String(d.access_token));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get server date WIB",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits?per_page=1",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_registration}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_today\",String(payload.meta.today));",
+              "pm.collectionVariables.set(\"e2e_weekday\",String(new Date(payload.meta.today+\"T12:00:00Z\").getUTCDay()||7));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Choose active assigned schedule",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/doctor-schedules?doctor_id={{e2e_staff}}&weekday={{e2e_weekday}}&active=true&per_page=100",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "const row=d.find(x=>x.doctor_active&&x.clinic_active);",
+              "if(!row){pm.execution.setNextRequest(null);throw new Error(\"No eligible schedule\");}",
+              "pm.collectionVariables.set(\"e2e_schedule\",String(row.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create dummy patient",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/patients",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_registration}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Postman Dummy {{e2e_run}}\", \"identity_no\": \"PM-{{e2e_run}}\", \"birth_date\": \"1990-01-01\", \"sex\": \"U\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"e2e_run\",pm.variables.replaceIn(\"{{$guid}}\").slice(0,12));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "if(pm.response.code!==201){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_patient\",String(d.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create e2e_proc",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/procedures",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"P1-{{e2e_run}}\", \"name\": \"Postman Procedure A Dummy\", \"price\": \"100000\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "if(pm.response.code!==201){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_proc\",String(d.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create e2e_proc2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/procedures",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"P2-{{e2e_run}}\", \"name\": \"Postman Procedure B Dummy\", \"price\": \"50000\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "if(pm.response.code!==201){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_proc2\",String(d.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create e2e_medicine",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/medicines",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"M-{{e2e_run}}\", \"name\": \"Postman Medicine Dummy\", \"unit\": \"tablet\", \"price\": \"2500\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "if(pm.response.code!==201){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_medicine\",String(d.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create e2e_labtest",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/lab-tests",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"code\": \"L-{{e2e_run}}\", \"name\": \"Postman Lab Dummy\", \"unit\": \"unit\", \"price\": \"150000\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "if(pm.response.code!==201){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_labtest\",String(d.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Initialize dummy stock via adjustment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_stockkey}}"
+          }
+        ],
+        "url": "{{core_url}}/master/medicines/{{e2e_medicine}}/adjust-stock",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"delta\": 20, \"reason\": \"Postman dummy stock\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"e2e_stockkey\",pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Stock 20\",()=>pm.expect(Number(d.stock)===20).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Register visit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_registration}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"patient_id\": \"{{e2e_patient}}\", \"schedule_id\": \"{{e2e_schedule}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\",()=>pm.response.to.have.status(201));",
+              "if(pm.response.code!==201){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Waiting\",()=>pm.expect(d.status===\"waiting\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_visit\",String(d.id));",
+              "pm.collectionVariables.set(\"e2e_registration_fee\",String(d.registration_fee));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject duplicate visit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_registration}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"patient_id\": \"{{e2e_patient}}\", \"schedule_id\": \"{{e2e_schedule}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\",()=>pm.response.to.have.status(409));",
+              "if(pm.response.code!==409){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Duplicate visit\",()=>pm.expect(payload.error.code===\"DUPLICATE_VISIT\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Start exam",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/start",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"In exam\",()=>pm.expect(d.status===\"in_exam\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Save clinical record",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/medical-record",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"complaint\": \"Dummy\", \"anamnesis\": \"Dummy\", \"physical_exam\": \"Dummy\", \"primary_diagnosis\": \"Dummy A\", \"secondary_diagnoses\": [\"Dummy B\"], \"vital_signs\": {\"systolic\": 120, \"diastolic\": 80, \"pulse\": 80, \"temperature\": 37.2, \"respiratory_rate\": 20, \"weight\": 65}, \"expected_version\": 0}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_version\",String(d.record.version));",
+              "pm.test(\"Record version 1\",()=>pm.expect(d.record.version===1).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Save two procedures",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/procedures",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"procedure_id\": \"{{e2e_proc}}\", \"quantity\": 1}, {\"procedure_id\": \"{{e2e_proc2}}\", \"quantity\": 1}], \"expected_version\": {{e2e_version}}, \"reason\": \"Postman dummy\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_version\",String(d.record.version));",
+              "pm.test(\"Procedure total\",()=>pm.expect(d.procedure_total===\"150000\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Save prescription",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/prescription",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"medicine_id\": \"{{e2e_medicine}}\", \"quantity\": 10, \"dosage\": \"dummy\", \"frequency\": \"dummy\"}], \"expected_version\": {{e2e_version}}, \"reason\": \"Postman dummy\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_version\",String(d.record.version));",
+              "pm.collectionVariables.set(\"e2e_rx\",String(d.prescription.id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Save lab order",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/lab-order",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"items\": [{\"lab_test_id\": \"{{e2e_labtest}}\"}], \"expected_version\": {{e2e_version}}, \"reason\": \"Postman dummy\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_version\",String(d.record.version));",
+              "pm.collectionVariables.set(\"e2e_laborder\",String(d.lab_orders[0].id));",
+              "pm.collectionVariables.set(\"e2e_labitem\",String(d.lab_orders[0].items[0].id));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read order through Node",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/laboratory/orders/{{e2e_laborder}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_laboratory}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Order ID\",()=>pm.expect(d.id===pm.collectionVariables.get(\"e2e_laborder\")).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Record lab result through Node",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_labkey}}"
+          }
+        ],
+        "url": "{{node_url}}/laboratory/items/{{e2e_labitem}}/result",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_laboratory}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"result_text\": \"Postman dummy result\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"e2e_labkey\",pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Lab complete\",()=>pm.expect(d.status===\"completed\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Replay same lab event",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_labkey}}"
+          }
+        ],
+        "url": "{{node_url}}/laboratory/items/{{e2e_labitem}}/result",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_laboratory}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"result_text\": \"Postman dummy result\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Lab replay\",()=>pm.expect(d.status===\"completed\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read current clinical state",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/clinical",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.collectionVariables.set(\"e2e_version\",String(d.record.version));",
+              "pm.test(\"Doctor sees result\",()=>pm.expect(d.lab_orders[0].items[0].result_text===\"Postman dummy result\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Finish exam",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/visits/{{e2e_visit}}/finish-exam",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"expected_version\": {{e2e_version}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Pending pharmacy\",()=>pm.expect(d.visit.status===\"services_pending\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dispense prescription",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/pharmacy/orders/{{e2e_rx}}/dispense",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_pharmacy}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Dispensed\",()=>pm.expect(d.status===\"dispensed\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Replay dispense",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/pharmacy/orders/{{e2e_rx}}/dispense",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_pharmacy}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Already dispensed\",()=>pm.expect(d.status===\"dispensed\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify stock once",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/master/medicines/{{e2e_medicine}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Stock exactly 10\",()=>pm.expect(Number(d.stock)===10).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read automatic invoice",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/billing/visits/{{e2e_visit}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Unpaid invoice with five lines\",()=>pm.expect(d.payment_status===\"unpaid\" && d.items.length===5).to.eql(true));",
+              "pm.test(\"Correct total\",()=>pm.expect(Number(d.total_amount)===Number(pm.collectionVariables.get(\"e2e_registration_fee\"))+325000).to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_revision\",String(d.revision));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Partial cash payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_paykey}}"
+          }
+        ],
+        "url": "{{core_url}}/billing/visits/{{e2e_visit}}/payments",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"amount\": \"150000\", \"method\": \"cash\", \"expected_revision\": {{e2e_revision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"e2e_paykey\",pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Partial paid\",()=>pm.expect(d.invoice.payment_status===\"partial\" && d.invoice.paid_amount===\"150000\").to.eql(true));",
+              "pm.collectionVariables.set(\"e2e_payment\",String(d.payment_id));",
+              "pm.collectionVariables.set(\"e2e_balance\",String(d.invoice.balance));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Replay partial payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_paykey}}"
+          }
+        ],
+        "url": "{{core_url}}/billing/visits/{{e2e_visit}}/payments",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"amount\": \"150000\", \"method\": \"cash\", \"expected_revision\": {{e2e_revision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Same payment ID, no extra debit\",()=>pm.expect(d.replayed===true && d.payment_id===pm.collectionVariables.get(\"e2e_payment\") && d.invoice.paid_amount===\"150000\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject changed payment under same key",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_paykey}}"
+          }
+        ],
+        "url": "{{core_url}}/billing/visits/{{e2e_visit}}/payments",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"amount\": \"150001\", \"method\": \"cash\", \"expected_revision\": {{e2e_revision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\",()=>pm.response.to.have.status(409));",
+              "if(pm.response.code!==409){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Key conflict\",()=>pm.expect(payload.error.code===\"IDEMPOTENCY_CONFLICT\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Final noncash payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Idempotency-Key",
+            "value": "{{e2e_lastkey}}"
+          }
+        ],
+        "url": "{{core_url}}/billing/visits/{{e2e_visit}}/payments",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\"amount\": \"{{e2e_balance}}\", \"method\": \"non_cash\", \"expected_revision\": {{e2e_revision}}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set(\"e2e_lastkey\",pm.variables.replaceIn(\"{{$guid}}\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Paid and completed\",()=>pm.expect(d.invoice.payment_status===\"paid\" && d.invoice.balance===\"0\" && d.invoice.visit_status===\"completed\" && d.invoice.payments.length===2).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Read paid invoice and receipts",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/billing/visits/{{e2e_visit}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Two receipts\",()=>pm.expect(d.payment_status===\"paid\" && d.payments.length===2 && d.payments[0].receipt_no!==d.payments[1].receipt_no).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports summary through Node",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/summary?from={{e2e_today}}&to={{e2e_today}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Nonempty visit/revenue\",()=>pm.expect(Number(d.visits.visits)>=1 && Number(d.revenue.amount)>=350000-25000).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report detail visits",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/details?from={{e2e_today}}&to={{e2e_today}}&metric=visits",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Report shape\",()=>pm.expect(d.metric===\"visits\" && Array.isArray(d.rows)).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report detail clinics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/details?from={{e2e_today}}&to={{e2e_today}}&metric=clinics",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Report shape\",()=>pm.expect(d.metric===\"clinics\" && Array.isArray(d.rows)).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report detail procedures",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/details?from={{e2e_today}}&to={{e2e_today}}&metric=procedures",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Report shape\",()=>pm.expect(d.metric===\"procedures\" && Array.isArray(d.rows)).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report detail revenue",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/details?from={{e2e_today}}&to={{e2e_today}}&metric=revenue",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Report shape\",()=>pm.expect(d.metric===\"revenue\" && Array.isArray(d.rows)).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report detail medicines",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/details?from={{e2e_today}}&to={{e2e_today}}&metric=medicines",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Report shape\",()=>pm.expect(d.metric===\"medicines\" && Array.isArray(d.rows)).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Report detail payments",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/details?from={{e2e_today}}&to={{e2e_today}}&metric=payments",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\",()=>pm.response.to.have.status(200));",
+              "if(pm.response.code!==200){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Report shape\",()=>pm.expect(d.metric===\"payments\" && Array.isArray(d.rows)).to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reject cashier report",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{node_url}}/reports/summary?from={{e2e_today}}&to={{e2e_today}}",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\",()=>pm.response.to.have.status(403));",
+              "if(pm.response.code!==403){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "const payload=pm.response.json();",
+              "pm.test(\"Request ID present\",()=>pm.expect(payload.meta.request_id).to.be.a(\"string\"));",
+              "const d=payload.data;",
+              "pm.test(\"Role denied\",()=>pm.expect(payload.error.code===\"FORBIDDEN\").to.eql(true));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_admin}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "if(pm.response.code!==204){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "pm.collectionVariables.unset(\"e2e_admin\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout registration",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_registration}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "if(pm.response.code!==204){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "pm.collectionVariables.unset(\"e2e_registration\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout doctor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_doctor}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "if(pm.response.code!==204){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "pm.collectionVariables.unset(\"e2e_doctor\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout pharmacy",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_pharmacy}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "if(pm.response.code!==204){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "pm.collectionVariables.unset(\"e2e_pharmacy\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout laboratory",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_laboratory}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "if(pm.response.code!==204){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "pm.collectionVariables.unset(\"e2e_laboratory\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logout cashier",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{core_url}}/auth/logout",
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{e2e_cashier}}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 204\",()=>pm.response.to.have.status(204));",
+              "if(pm.response.code!==204){pm.execution.setNextRequest(null);throw new Error(\"Unexpected response; stop and inspect before retry\");}",
+              "pm.collectionVariables.unset(\"e2e_cashier\");"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+*.sh text eol=lf
+backend-yii/yii text eol=lf
