@@ -1,34 +1,33 @@
-# Requirement traceability — REAL CASE TEST, PT Inova Medika Solusindo
+# Pemetaan persyaratan terhadap implementasi dan bukti
 
-Source: original five-page assignment, sections A–G. Status **S** = source implementation present, **P** = planned/pending evidence, **D** = documentation included. S does not mean runtime pass. Paths below are relative to repository root.
+Pemetaan B–G merujuk studi kasus PT Inova Medika Solusindo. Bukti final berasal dari pengujian lokal tanggal 25 November 2026, bukan dari screenshot mockup. Status kelompok lulus tidak berarti seluruh kombinasi browser atau setiap skenario negatif diuji manual.
 
-| Requirement | Source / deliverable | Verification | Status |
-|---|---|---|---|
-| A, E1–5: React, Yii, Node, PostgreSQL, REST | frontend, backend-yii, backend-node, database, docker-compose.yml | qa-runtime.py build + health | S; P runtime |
-| B1: patients/MRN, staff, clinics, schedules, procedures/tariffs, medicines/stock/prices; CRUD/search/filter/validation/duplicates | MasterController, MasterService, MasterPolicy, MasterData UI; schema | master-smoke.py, MasterData collection | S; P runtime |
-| B2: MRN/identity lookup, register, clinic/doctor schedule, automatic queue, status/history | VisitController, VisitService, Visits.tsx | visit-smoke.py, Visits collection | S; P runtime |
-| B3: doctor queue, complaint/anamnesis/vitals/physical exam/primary+secondary diagnoses and history | ClinicalController, ClinicalService, Clinical.tsx | clinical-smoke.py, Clinical collection | S; P runtime |
-| B4: multiple master procedures/tariffs, invoice components | ClinicalService, BillingService, visit_procedures | clinical-smoke.py, billing-smoke.py | S; P runtime |
-| B5: Rx names/dose/frequency/quantity, validation, dispense, decrement, drug history | AncillaryService, AncillaryEditor/Queue, stock_movements | ancillary-smoke.py | S; P runtime |
-| B6: lab request/list/result/history, integration API | AncillaryService, backend-node/src/laboratory.ts, clinical history | ancillary-smoke.py, End-to-End collection | S; P runtime |
-| B7: four cost components, auto total, cash/noncash simulation, unpaid/partial/paid, installments, dedup, history, print | BillingService, Billing.tsx, invoice/payment tables | billing-smoke.py + browser print | S; P runtime |
-| B8: visits, by clinic, procedures, revenue, drug usage, payment status, period and drill-down | backend-node/src/reporting.ts, Reports.tsx, reporting views | report-admin-smoke.py, Reporting-Admin collection | S; P runtime |
-| B9, E6: auth/authorization, 6 roles, validation | AuthService, RolePolicy, AdminService, Node auth, route guards | smoke.py, security-smoke.py | S; P runtime |
-| C1–5: lab/external REST, dashboard API, middleware, consistent errors, API docs | laboratory.ts, reporting.ts, auth.ts, api.ts, docs/API.md | health, collection, outage smoke | S/D; P runtime |
-| D1: duplicate registration | VisitService + unique constraints | visit-smoke.py | S; P runtime |
-| D2: concurrent stock | AncillaryService + conditional update | ancillary-smoke.py | S; P runtime |
-| D3: duplicate payment | BillingService + UUID ledger | billing-smoke.py | S; P runtime |
-| D4: edit after billing | ClinicalService + invoice revision | billing-smoke.py | S; P runtime |
-| D5: service outage | Node timeout, retry and Core fallback | ancillary-smoke.py --outage, manual ambiguity test | S; P runtime; no durable offline queue |
-| D6: performance | indexes, bounded aggregates, pagination, explain-reporting.sql | SQL plan + measured benchmark | S; P measurement |
-| E7, F5: Postman API tests | postman/*.json | execute/export results locally | S collections; P evidence |
-| E8, F1: Git and accessible repository | .gitignore, GITHUB_SETUP.md, ZIP | initialize/commit/push and verify evaluator access | P remote |
-| E9–10: libraries and Yii/Node split | package manifests; ARCHITECTURE.md | dependency resolution; review | D/S; P build |
-| F1: three source code sets | frontend, backend-yii, backend-node | ZIP manifest | S |
-| F2: schema, relations, ERD, migration/SQL | database/schema.sql; three Yii migrations; ERD.md | clean migration + round-trip latest | D/S; P runtime |
-| F3: architecture, communication, API, installation, technical decisions | README, ARCHITECTURE, API, TECHNICAL_DECISIONS | review | D |
-| F4: screenshots, full workflow, invoice/receipt, Node evidence | DEMO_WALKTHROUGH, SUBMISSION_CHECKLIST | capture actual screenshots and response | P |
-| F5: test cases, Postman evidence, critical unit/integration | TEST_CASES, TESTING, static evidence, scripts | static log; execute QA/Postman | D/S; P runtime |
-| G: 72h from receipt, dummy data, email subject | README, seed, SUBMISSION_EMAIL.md | candidate verifies actual deadline and submits | D; P submission |
+| Persyaratan | Implementasi utama | Pengujian/bukti |
+|---|---|---|
+| B1 master | MasterService, MasterData.tsx, schema | master-smoke.py, screenshot 04 |
+| B2 pendaftaran/antrean | VisitService, Visits.tsx, queue_counters | visit-smoke.py, screenshot 05–07 |
+| B3 EMR/histori | ClinicalService, Clinical.tsx | clinical-smoke.py, screenshot 08–09/16–18 |
+| B4 tindakan/tarif | ClinicalService, BillingService, visit_procedures | clinical/billing-smoke.py, screenshot 10–11 |
+| B5 farmasi/stok | AncillaryService, AncillaryEditor/Queue, stock_movements | ancillary-smoke.py, screenshot 12–13/23–26 |
+| B6 lab/hasil/integrasi | AncillaryService, laboratory.ts, histori klinis | ancillary-smoke.py, Newman 24–26, screenshot 14–15/20–22 |
+| B7 billing/print | BillingService, Billing.tsx, invoice/payment tables | billing-smoke.py, Newman, screenshot 27–34, tiga PDF |
+| B8 dashboard | reporting.ts, Reports.tsx, reporting views | report-admin-smoke.py, Newman 38–44, screenshot 01–03 |
+| B9/E6 autentikasi dan RBAC | AuthService, RolePolicy, AdminService, Node auth, route guard | smoke.py, security-smoke.py, Newman 03–08/45–51 |
+| C1–5 Node REST | laboratory.ts, reporting.ts, auth.ts, api.ts, API.md | QA outage, Newman 24–26/38 |
+| D1 duplikasi | VisitService, unique constraint/counter | visit-smoke.py dan Newman 18 |
+| D2 race stok | AncillaryService dan UPDATE bersyarat | ancillary-smoke.py dan invariant SQL |
+| D3 pembayaran ganda | BillingService, UUID ledger | billing-smoke.py dan Newman 33–36 |
+| D4 revisi setelah invoice | ClinicalService, invoice revision | billing-smoke.py |
+| D5 gangguan integrasi | Timeout Node, retry, fallback Core | ancillary-smoke.py --outage; tidak ada durable queue |
+| D6 performa | Indeks, agregat, pagination, explain-reporting.sql | Plan SQL aktual pada dataset kecil; load test belum ada |
+| E7/F5 Postman | postman/*.json | 51 request/133 assertion Newman lulus |
+| E8/F1 Git | .gitignore, GITHUB_SETUP.md | Commit lokal; akses remote perlu verifikasi |
+| E9–10 stack | Manifest dan arsitektur | Build Docker berhasil; lockfile/advisory belum lengkap |
+| F1 source | frontend, backend-yii, backend-node | Source tersedia |
+| F2 DB | schema.sql, empat migration, ERD.md | Migration QA dan upgrade non-destructive |
+| F3 dokumentasi | README, ARCHITECTURE, API, TECHNICAL_DECISIONS | Dokumentasi Bahasa Indonesia |
+| F4 bukti | screenshot, invoice, kuitansi, Newman Node | 34 gambar/3 PDF, bukti aktual |
+| F5 pengujian | TEST_CASES, TESTING, scripts, log statis | 844 HTTP checks, 1.554 assertion statis, Newman |
+| G pengumpulan | Data dummy, SUBMISSION_EMAIL.md | Deadline sesuai HR; email/publikasi perlu dilakukan |
 
-No external Git repository, actual screenshots, printed invoice, Postman execution or performance results are fabricated. Browser print supports saving PDF; no dedicated report export. Optional UI/filter features present in source.
+Lihat [indeks bukti](evidence/FINAL_RUNTIME_EVIDENCE.md), [UAT final](FINAL_UAT.md) dan [daftar periksa](SUBMISSION_CHECKLIST.md). Screenshot pengguna/audit versi final belum tersedia, tetapi pengujian pengguna dikonfirmasi dan API diuji. Tidak ada klaim pengujian beban produksi atau audit keamanan independen.

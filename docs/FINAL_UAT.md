@@ -1,31 +1,23 @@
-# v1.1.0 targeted UAT and evidence collection — all pending
+# UAT terarah dan pengumpulan bukti v1.1.0
 
-Use the upgrade guide. Run historical read-only checks on preserved DB; use new dummy visits and accounts for write tests, and a disposable QA stack for race/failure tests. Use current WIB date for new registration and 24 Nov 2026 for original historical fixtures. No real health or payment data. Do not declare PASS without observation.
+Tanggal pelaksanaan 25 November 2026 (WIB). Tujuh kelompok alur utama telah lulus berdasarkan tangkapan layar dan konfirmasi pengguna; tabel berikut membedakan bukti aktual dari cakupan tambahan yang belum diverifikasi satu per satu. Gunakan data dummy dan QA terisolasi untuk race/failure.
 
-| ID | Gate | Expected | Evidence |
+| ID | Skenario | Kriteria | Status/bukti |
 |---|---|---|---|
-| R110-01 | Backup + migrate only | validated dump TOC, empty business fingerprint diff, 4 migrations, 3 HTTP health/UI checks | private backup, scrubbed migration log |
-| R110-02 | Login, refresh, logout all six roles; stale tabs | same role/route after refresh; another login invalidates older tab locally; stale logout cannot revoke newer different-account cookie; old token after explicit logout rejected | actual screenshots and security HTTP suite |
-| R110-03 | Auto master codes + manual compatibility; active/status/delete | no duplicate codes, references block strict delete, old codes/stock unchanged | master smoke + actual UI |
-| R110-04 | Master sidebar and simple form | seven admin submenu items; role-filtered other menus; centered modal, icon/tooltip, mobile layout, no false dirty prompt | screenshots |
-| R110-05 | New registration → doctor, no optional services | no duplicate visit/queue; save first record without reason; explicit skip; review then finish; registration-only invoice | screenshot + runtime suite |
-| R110-06 | Full care visit | procedures/Rx/lab save and version updates; actual lab via Node; stock dispense once; four invoice categories | doctor review, Node network response, stock |
-| R110-07 | Clinical amendments + stale version | reason required for persisted change incl clear/re-add; reject stale; diagnosis correction audited; procedure revision only before first payment | HTTP + UI |
-| R110-08 | Cashier partial/full payment | exact balance/progress, same-key replay no duplicate; admin unpaid invoice read-only | invoice screenshot, receipts, negative RBAC |
-| R110-09 | Print | A4 actual invoice and both receipts; correct nominal and identifiers; header/footer browser option off | PDFs |
-| R110-10 | Original UAT read-only | historical Budi/Siti invoices, prior stock and dates retained (compare actual state before upgrade) | before/after UI |
-| R110-11 | Reports | old fixture totals reconcile; all drilldowns and filter; period boundaries and empty charts; paid_at vs visit-date cohort | dashboard, SQL reconciliation |
-| R110-12 | Admin and audit | staff name, explicit role, separate edit/reset/status, self protection; actor/action/entity filter; detail no sensitive fields | UI + HTTP |
-| R110-13 | Failure and concurrency | duplicate registration, stock race, payment replay, stale invoice, Node outage & recover, DB grants/ledger invariants | isolated QA actual logs |
-| R110-14 | Responsive and navigation | 375px/1024px/desktop, keyboard, clean navigation unblocked; dirty guard, retry data safe | actual browser evidence |
-| R110-15 | Postman & submission | 51 end-to-end requests run and assertions verified; scrubbed evidence, accessible Git, email | actual collection runner, repo link |
+| R110-01 | Backup/migration | TOC dump, fingerprint identik, empat migration, health | Lulus; terminal upgrade |
+| R110-02 | Sesi enam role dan tab lama | Refresh, logout, bearer dicabut, cookie beda akun aman | Alur utama dikonfirmasi; HTTP QA; seluruh variasi browser belum dibuktikan |
+| R110-03 | Kode master/status/hapus | Kode unik, referensi mencegah delete ketat | Lulus alur utama; QA master |
+| R110-04 | Sidebar/modal | 7 submenu, modal tengah, tooltip, role filter | Lulus desktop; responsive detail belum dibuktikan |
+| R110-05 | Kunjungan tanpa layanan opsional | Skip eksplisit, simpan pertama tanpa alasan, invoice pendaftaran | Tercakup aturan/QA; bukti browser skip khusus belum ada |
+| R110-06 | Kunjungan lengkap | Versi naik, lab Node, stok sekali, empat kategori | Lulus; screenshot 05–34 dan Newman |
+| R110-07 | Revisi dan stale version | Reason untuk edit, audit, revisi sebelum bayar | QA lulus; detail browser revisi belum tercatat lengkap |
+| R110-08 | Pembayaran bertahap | Saldo eksak, replay, admin read-only | Lulus alur kasir dan QA; detail admin unpaid di browser belum dibuktikan |
+| R110-09 | Cetak | A4 invoice dan dua kuitansi | Tiga PDF aktual; footer browser about:blank masih ada |
+| R110-10 | Data sebelum upgrade | Invoice/stok lama tetap | Lulus fingerprint dan dashboard |
+| R110-11 | Laporan | Total akurat, filter, modal, basis tanggal | Lulus alur utama; QA perbandingan SQL; tidak semua modal didokumentasikan |
+| R110-12 | Pengguna dan audit | Nama staff, aksi terpisah, filter, proyeksi aman | Dikonfirmasi pengguna; API QA; screenshot final belum tersedia |
+| R110-13 | Concurrency/outage | Duplikat, stock race, idempotency, DB grants | Lulus QA terisolasi |
+| R110-14 | Responsive dan navigasi | 375/1024/desktop, keyboard, dirty guard | Belum terbukti lengkap |
+| R110-15 | Postman dan pengumpulan | 51 request dan assertion, Git dapat diakses | Newman lulus; publikasi/pengiriman perlu verifikasi |
 
-Prioritize R110-01/02/05/06/08/10/11/13/15 if time limited, but disclose incomplete cases. Remaining detailed phase cases are in QA_MANUAL_CHECKLIST.md. This is a release gate, not evidence of passing tests.
-
-## Evidence record template
-
-| Case | Actual timestamp/WIB | Environment | Expected | Observed | PASS/FAIL/BLOCKED | Screenshot/log |
-|---|---|---|---|---|---|---|
-| R110-01 | — | — | — | Not run | PENDING | — |
-
-Use existing `docs/SUBMISSION_CHECKLIST.md` filename map. Store selected scrubbed output in `docs/evidence/runtime/`. Never copy `.env`, dumps, raw bearer tokens, or complete Postman current values into the repository. Include failed results or open limitations honestly. Previous screenshots are v1.0.0 only, not v1.1.0 acceptance proof.
+Bukti utama: [indeks aktual](evidence/FINAL_RUNTIME_EVIDENCE.md). Jangan mengubah hasil yang belum dicatat menjadi Lulus. Catat tanggal/WIB, lingkungan, ID skenario, harapan, observasi, status dan nama bukti. Checklist rinci tersedia di [QA manual](QA_MANUAL_CHECKLIST.md). Jangan mengunggah backup, `.env` atau raw token.

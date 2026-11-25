@@ -1,3 +1,3 @@
-# Runtime evidence — pending
+# Bukti pengujian runtime
 
-This folder intentionally contains no generated runtime evidence. Add actual scrubbed evidence after local execution, following ../../SUBMISSION_CHECKLIST.md. The static logs in the parent folder are actual authoring checks, not evidence of a running app. Do not create dummy screenshots or fake Postman results.
+Bukti aktual v1.1.0 disimpan di direktori induk: [indeks bukti](../FINAL_RUNTIME_EVIDENCE.md), [tangkapan layar](../screenshots/), [dokumen billing](../billing/), [QA](../automated-qa/runtime-excerpts.txt) dan [Newman](../postman/newman-summary.txt). Log statis adalah hasil fase pengembangan, bukan bukti aplikasi berjalan. Gunakan hanya bukti asli yang telah disaring; jangan unggah token, prefix, `.env`, database dump atau data asli.

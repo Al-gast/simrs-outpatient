@@ -1,27 +1,27 @@
-# Demonstration walkthrough — one dummy visit
+# Panduan demonstrasi satu kunjungan dummy
 
-Prerequisite: successful startup and migration, or retained isolated QA environment; use its actual password prefix. Open `http://localhost:3000`. Use a new dummy patient for each run (one visit per patient/clinic/day). Seed has Poli Umum (Rp25,000), doctor D001 with schedule every weekday 08:00–16:00, T001 consultation (Rp100,000), T002 general exam (Rp50,000), OB001 dummy medicine (Rp2,500/tablet), L001 lab (Rp150,000). Existing master changes can alter expected totals: check current prices first. Dates use WIB; registration checks matching weekday, not current clock within shift.
+Prasyarat: layanan sehat, migration dan seed berhasil, gunakan awalan kata sandi environment yang sedang berjalan. Buka `http://localhost:3000`. Buat pasien dummy baru per simulasi. Seed: Poli Umum Rp25.000; D001 praktik hari kerja 08.00–16.00; T001 Konsultasi Rp100.000, T002 Pemeriksaan umum Rp50.000, OB001 Rp2.500/tablet, L001 Darah lengkap Rp150.000. Periksa harga dan stok kini, karena master dapat berubah. Tanggal WIB, jadwal memeriksa hari aktif bukan jam saat ini.
 
-| Step / role | Action | Expected output / capture |
+| Langkah/peran | Aksi | Hasil yang diharapkan |
 |---|---|---|
-| 1 admin | Open dashboard, master clinics/doctor schedule/medicine, confirm stock >=10 | Actual initial metrics; available master data |
-| 2 registration | Create new dummy patient with unique synthetic identity, birth date, sex; search by MRN/identity | Generated MRN; no real identity |
-| 3 registration | Register patient to Poli Umum, D001, today's schedule | Queue label; status waiting; fee snapshot Rp25,000 |
-| 4 doctor | Open own queue; start assigned visit, fill required complaint/anamnesis/vitals/physical/diagnoses, Simpan & lanjutkan | in_exam; record version 1 (new record) |
-| 5 doctor | Follow steps: T001 + T002 (qty 1 each), Simpan & lanjutkan; OB001 qty 10 with dummy dosage/frequency text, Simpan & lanjutkan; L001, Simpan & lanjutkan; review. Optional steps may be skipped without creating an empty order. | Procedure total Rp150,000; Rx Rp25,000; lab Rp150,000; versions increase |
-| 6 laboratory | Open lab queue, input clearly dummy free-text result via Node route | Result saved; completed lab order; Node HTTP success; capture actual Network/Postman response (redact token) |
-| 7 doctor | Reload clinical workspace if needed, revisit the saved steps, review lab result, finish exam | services_pending if Rx pending; version check |
-| 8 pharmacy | Open pending Rx, confirm stock, dispense | Stock decreases 10 exactly once; dispensed; ready_for_billing; automatic invoice |
-| 9 cashier | Open dedicated visit invoice; confirm four category groups in order: registration, procedure, medicine, laboratory; first pay Rp150,000 cash | Total Rp350,000 at unchanged seed prices; partial, remaining Rp200,000 |
-| 10 cashier | Pay remaining Rp200,000 non-cash (simulation) | Paid, balance zero, completed visit, two unique receipts |
-| 11 cashier | Cetak invoice; print both receipts, save to PDF from browser; disable Headers and footers | Actual print preview and files; each receipt represents one payment, not necessarily full settlement |
-| 12 admin | Filter dashboard to today; inspect six centered drill-downs, monitoring and localized audit detail | Actual aggregates include other test transactions; cash uses payment date, invoice totals use visit date; do not equate global totals with this single visit |
-| 13 doctor | Open completed visit history and verify Rx/lab/EMR available; diagnosis-only correction if desired | History available subject to doctor scope; paid costs immutable |
+| 1 admin | Periksa dasbor, poli, jadwal, stok ≥10 | Data aktual, bukan angka contoh |
+| 2 registration | Buat pasien dummy, cari nama/RM | RM otomatis |
+| 3 registration | Daftar ke Poli Umum dan jadwal D001 hari ini | Antrean harian, waiting, Rp25.000 |
+| 4 doctor | Mulai, isi keluhan/anamnesis/vital/fisik/diagnosis dummy, simpan | in_exam, versi 1 |
+| 5 doctor | T001 dan T002 masing-masing 1, resep OB001 10 tablet, L001; simpan tiap tahap dan review | Rp150.000 tindakan, Rp25.000 obat, Rp150.000 lab; versi bertambah |
+| 6 doctor | Selesaikan pemeriksaan setelah review | services_pending jika lab/resep menunggu |
+| 7 laboratory | Catat hasil dummy via Node | Selesai; HTTP sukses; key replay aman |
+| 8 pharmacy | Konfirmasi penyerahan | Stok berkurang 10 sekali; ready_for_billing dan invoice otomatis |
+| 9 cashier | Periksa empat kategori biaya, bayar Rp150.000 tunai | Total Rp350.000, sisa Rp200.000, partial |
+| 10 cashier | Bayar Rp200.000 non-tunai simulasi | Lunas, saldo 0, completed, dua kuitansi |
+| 11 cashier | Cetak invoice dan dua kuitansi | A4, nominal dan ID benar; matikan header/footer browser |
+| 12 admin | Filter periode hari ini, buka rincian dan audit | Angka aktual mencakup semua transaksi; kas berdasarkan paid_at, tagihan tanggal kunjungan |
+| 13 doctor | Lihat histori kunjungan selesai | Hasil lab/resep/rekam medis sesuai scope |
 
-For step 4 use clearly labeled synthetic values (e.g. BP 120/80, pulse 80, temp 37.2, respiratory rate 20, weight 65), free-text "Dummy" diagnoses and notes; not clinical advice. If lab was not processed before finish, visit stays services_pending until both services complete. Log out between roles (revokes all sessions for that role). Reload restores the original unexpired browser session; logout, expiry or account revocation requires login. Follow UI labels in actual running app, not chat mockups.
+Tindakan, resep, dan lab boleh dilewati bila tidak diperlukan; jangan membuat layanan fiktif pada sistem nyata. Nilai klinis demonstrasi hanya dummy, bukan saran medis. Logout antarperan atau gunakan profil berbeda. Refresh memulihkan sesi belum kedaluwarsa. Hasil lab dapat juga disimpan sebelum finalisasi; invoice baru diterbitkan setelah pemeriksaan dan semua layanan selesai.
 
-## Technical demonstration (optional after happy path)
+## Bukti aktual
 
-Use isolated QA evidence to explain simultaneous registration, stock race, payment replay and revision vs payment; show actual exit statuses and SQL results. Demonstrate unpaid procedure revision on a *different* dummy visit, then try stale invoice revision. Do not edit a paid invoice. To show outage, use runner `--outage` or stop Node only on isolated dummy project, verify explicit Core lab fallback, then restart. Do not pretend actual lost response was reproduced unless recorded.
+Skenario 25 November 2026: Andi Saputra (Dummy), RM-000004, UMUM-001, kunjungan 4, RX-000002, LAB-000002, INV-000003 Rp350.000, PAY-000003 Rp150.000 dan PAY-000004 Rp200.000. Stok OB001 90→80. Lihat [indeks bukti](evidence/FINAL_RUNTIME_EVIDENCE.md). Request lab Node dibuktikan melalui Newman, bukan tangkapan Network.
 
-Record visit ID/MRN, queue, invoice revision/number, receipt numbers and correlation request IDs across evidence. No tokens, secrets, real patients or real transactions.
+Untuk demonstrasi teknis gunakan QA terisolasi: duplikasi pendaftaran, persaingan stok, replay pembayaran, revisi invoice sebelum pembayaran, stale version, outage Node dan fallback. Jangan ubah invoice lunas untuk sekadar demonstrasi. Simpan Request ID, ID kunjungan, nomor transaksi dan log tanpa token/rahasia.

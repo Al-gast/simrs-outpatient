@@ -1,25 +1,25 @@
-# Technical interview preparation
+# Persiapan wawancara teknis
 
-Explain the actual implementation in your own words; inspect services and run tests before claiming results. Do not claim to have personally authored or measured anything you cannot explain. The assignment focuses on flow, logic, code organization, CRUD and authentication.
+Pahami implementasi yang benar-benar berjalan; jangan menghafal angka atau mengklaim pengukuran yang tidak dapat dijelaskan. Gunakan source dan bukti aktual untuk mendukung jawaban.
 
-| Question | Answer points / code to inspect | Follow-up / trade-off |
-|---|---|---|
-| Why two backends? | Yii2 authoritative write service; Node lab bridge + reporting view reads; React REST | Shared core auth availability; no distributed DB writes |
-| Why not MAX(queue)+1? | Atomic counter UPSERT under transaction and two unique constraints, VisitService | Counter rollback; one visit per patient/clinic/day |
-| How does stock race work? | Visit lock, sorted item IDs, conditional UPDATE and stock ledger, AncillaryService | No reservation, all-or-nothing; deadlock retry |
-| What if response lost after payment? | Same UUID/fingerprint replay before balance validation, BillingService | Different key not automatically same transaction; reconcile history |
-| How do clinical versions work? | Single shared EMR version for clinical writes; 409 stale | No auto merge, reload/reconcile |
-| Can doctor edit after invoice? | Unpaid procedure revision with invoice lock and revision; diagnosis-only changes after payment | No refund/credit note; freeze cost after first payment |
-| Why integer Rupiah? | Bigint stored, decimal string over JSON, bounded quantities | Avoid floating precision; validate server values |
-| What if Node fails? | Timeout, same-key retry, direct Core fallback; no false ack | No durable queue; client needs retention and reconciliation |
-| What prevents IDOR? | Backend role and assigned doctor scope; 404 for inaccessible resources | Authorized clinical history only; separate DTO projections |
-| How does logout work? | Token_version increment; Node introspection; no token in localStorage | Revokes all sessions; in-flight requests may finish |
-| Why audit append-only? | Runtime role can insert/select, not update/delete ledger | Owner can mutate; no cryptographic proof or compliance claim |
-| What does revenue mean? | Sum recorded payments by paid_at WIB; not invoice value | Status report current state of selected visit cohort |
-| How do you optimize reports? | Independent aggregates, half-open timestamp ranges, indexes, pool, bounded dates and pagination | No measured SLA yet; explain plans with actual dataset |
-| What tests prove concurrency? | Parallel HTTP barriers + SQL invariants; static policy checks separate | Sequential Postman can't prove race; actual run evidence required |
-| What is not production ready? | No real data/payment gateway, lockfiles/advisory checks and runtime pending until verified, no offline durable queue | TLS, backups, operational monitoring, privacy, external security assessment needed |
+| Pertanyaan | Pokok jawaban dan trade-off |
+|---|---|
+| Mengapa dua backend? | Yii2 penulis tunggal; Node integrasi lab dan SELECT view. Tidak ada duplikasi transaksi, tetapi Node bergantung Core untuk autentikasi. |
+| Mengapa bukan MAX(queue)+1? | Counter UPSERT atomik, constraint unik, rollback dalam VisitService. Satu kunjungan/poli/hari. |
+| Bagaimana race stok ditangani? | Lock visit, ID obat terurut, UPDATE bersyarat, ledger atomik. Tidak ada reservasi stok saat resep. |
+| Respons pembayaran hilang? | Retry UUID/payload sama, cek ledger sebelum saldo. Key berbeda bukan transaksi yang sama. |
+| Bagaimana versi klinis bekerja? | Versi bersama untuk perubahan klinis; stale 409, muat ulang dan rekonsiliasi, tanpa auto-merge. |
+| Edit setelah invoice? | Tindakan hanya sebelum pembayaran pertama, invoice revision; diagnosis saja tetap boleh dengan audit. Tidak ada refund. |
+| Mengapa integer Rupiah? | Bigint dan string desimal menghindari floating point; validasi batas. |
+| Jika Node mati? | Timeout, replay key sama dan fallback Core; tidak ada false ack atau durable queue. |
+| Apa yang mencegah IDOR? | Otorisasi backend dan scope doctor_id/staff_id, 404 di luar scope. Proyeksi DTO terbatas. |
+| Bagaimana logout? | token_version, Node introspeksi, cookie HttpOnly; tab lama tidak mencabut sesi akun lain. Revokasi semua sesi akun, request in-flight mungkin selesai. |
+| Mengapa audit append-only? | Runtime INSERT/SELECT tanpa UPDATE/DELETE; owner tetap dapat mengubah, bukan bukti kriptografis. |
+| Definisi pendapatan? | Pembayaran tercatat menurut paid_at WIB; tagihan menurut kelompok tanggal kunjungan. |
+| Optimasi laporan? | View, indeks, agregat, range tanggal dan pagination; plan dataset kecil bukan SLA. |
+| Bukti concurrency? | Request paralel dan invariant SQL, bukan Postman sequential. Tunjukkan log 844 HTTP checks. |
+| Apa yang belum siap produksi? | TLS, backup restore, monitoring, lockfile/advisory, load test, keamanan independen, privasi dan integrasi nyata. |
 
-## Demo strategy (10–15 minutes)
+## Strategi demo
 
-Show architecture and ERD briefly, then one complete dummy visit using `DEMO_WALKTHROUGH.md`. Demonstrate partial and final payments and actual invoice print, Node integration response and report filters. Present actual QA results and one race test. Explain limitations openly. If something failed, describe observed error, hypothesis, verification, root cause and fix rather than hiding it.
+Jelaskan diagram arsitektur/ERD, lalu satu kunjungan dummy hingga lunas, invoice dan kuitansi, Node lab dan filter laporan. Tunjukkan log QA dan Newman (51 request/133 assertion) beserta batasannya. Untuk debugging, jelaskan evidence → hipotesis → verifikasi → root cause → perbaikan, misalnya merge `JsonExpression` lokal yang dipertahankan saat upgrade. Jangan mengarang pengalaman, hasil pengukuran atau riwayat commit.

@@ -1,27 +1,34 @@
-# Postman execution guide (not yet run)
+# Panduan pengujian Postman Collection melalui Newman atau Postman Desktop
 
-Use a running disposable dummy stack at localhost. Import `SIMRS.postman_environment.json` and select it. Fill local/current `demo_prefix` from the actual `.env` in the running stack's workdir; never share the value. Keep URLs as `http://localhost:8080/api/v1` and `http://localhost:3001/api/v1`. Do not point collections at production.
+Gunakan stack dummy terisolasi, bukan DB utama. Import `SIMRS.postman_environment.json` dan isi `demo_prefix` dari `.env` stack QA secara lokal. URL Core `http://localhost:8080/api/v1`, Node `http://localhost:3001/api/v1`. Jangan share nilai prefix atau token. Lihat direktori/nama stack yang dicetak runner QA.
 
-## Recommended end-to-end run
+## Alur End-to-End
 
-Import `End-to-End.postman_collection.json`. Use Collection Runner, one iteration, sequential, from first request to last. It has 51 requests with status/shape/business assertions. It creates unique synthetic masters, patient, visit, prescription, lab result and payments. The date is read from Core API, and the assigned active schedule is selected dynamically. It calculates the expected invoice from actual registration fee + fixed created procedure/medicine/lab prices. It tests duplicate registration, lab same-key replay, dispense replay and stock, partial cash, same-key payment replay/conflict, final noncash, paid invoice, reporting and RBAC. It logs out six roles at end. This is sequential, not a concurrency test.
+`End-to-End.postman_collection.json` berisi 51 request berurutan, satu iterasi. Tanggal dibaca dari server WIB, jadwal aktif dipilih dinamis, master/pasien dummy unik dibuat, lalu pendaftaran, klinis, lab Node, farmasi, invoice, pembayaran, laporan dan logout enam role. Assertion meliputi duplikasi, replay lab/dispense/payment, konflik payload, saldo dan RBAC. Ini pengujian sequential, bukan bukti race.
 
-Run on a fresh or retained disposable QA DB. Do not run selected middle requests without their variables. If a request fails or times out, stop and inspect (a failed assertion does not necessarily stop the runner). For ambiguous payment/lab/stock writes, retain original key/body and query current state; retry using the replay request or disable key regeneration in the original request. Do not rerun a key-generating request blindly. If resetting the entire workflow, use a new dummy patient/masters only after reconciling the previous attempt. Failed runs can leave token values in collection variables; clear them manually. Do not export current secrets. Runtime evidence is pending.
+Di Postman Desktop: import koleksi dan environment, pilih environment SIMRS, jalankan Collection Runner dari awal hingga akhir. Alternatif Newman (Node/npm diperlukan): simpan salinan environment terisi di direktori privat di luar repo dan gunakan perintah berikut dengan path aktual.
 
-## Focused collections
+```bash
+npx --yes newman@6 run postman/End-to-End.postman_collection.json \
+  -e "$HOME/path-private/environment.json" \
+  --iteration-count 1 --bail failure
+```
 
-| Collection | Prerequisite |
+Untuk export JSON, gunakan `--reporters json --reporter-json-export` ke file privat. Raw report dapat memuat token, request body dan password. Buat salinan ringkasan yang hanya berisi nama request, metode, status HTTP, jumlah assertion dan kegagalan; jangan publish laporan mentah. Bersihkan nilai token/rahasia environment dan collection setelah tes. Jangan menjalankan request tengah tanpa variabel prasyarat. Timeout transaksi perlu rekonsiliasi sebelum retry; pertahankan UUID dan body semula. Jangan membuat key baru secara buta.
+
+## Koleksi terfokus
+
+| Koleksi | Prasyarat |
 |---|---|
-| SIMRS | Core/Node health, six seeded roles |
-| MasterData | seeded admin and master data |
-| Visits | seeded roles, visit list; validation probes |
-| Clinical | set collection variable `clinical_visit_id` to existing assigned dummy visit |
-| Ancillary | seeded roles; optional existing dummy lab item where applicable |
-| Billing | set `billing_visit_id` to existing eligible dummy visit with invoice |
-| Reporting-Admin | set `report_from`, `report_to` to desired WIB period (defaults were authoring dates) |
-| QA-Hardening | disposable DB; creates dummy medicine and adjusts stock |
+| SIMRS | Health Core/Node dan enam akun seed |
+| MasterData | Admin dan master seed |
+| Visits | Role dan daftar kunjungan |
+| Clinical | `clinical_visit_id` kunjungan dummy ditugaskan |
+| Ancillary | Role seed dan item lab dummy jika diperlukan |
+| Billing | `billing_visit_id` kunjungan yang memiliki invoice |
+| Reporting-Admin | `report_from`, `report_to` periode WIB |
+| QA-Hardening | DB disposable; membuat obat dan mutasi stok |
 
-Run focused collections in listed order, ensuring required state. Inspect individual test expectations; do not reuse keys for different transactions. Actual collection runner/export (or Postman CLI/Newman with compatible environment) is required for Postman evidence. Python smoke tests are separate. Screenshot run summary and relevant Node result response; export scrubbed results to docs/evidence/runtime. Clear environment secret/current token values and collection tokens from every export. Do not upload live credentials or real data.
+## Hasil aktual
 
-## v1.1.0 source validation
-`python3 scripts/check-release.py` checks all 9 collection files, request method/path mappings against Yii/Node route definitions, and JavaScript event syntax. It does not validate actual response behavior or count as Postman execution. Existing bearer collections remain valid with browser-specific session endpoints unchanged in shape; cookie-specific tests live in security-smoke.py and manual UAT.
+25 November 2026: Newman menjalankan 51/51 request dan 133/133 assertion, exit code 0. Request 24–26 menguji order/hasil lab/replay melalui Node; 38 laporan Node; 45 kasir ditolak 403. Bukti: [ringkasan](../docs/evidence/postman/newman-summary.txt) dan [JSON yang disaring](../docs/evidence/postman/newman-result.json). Tidak ada screenshot Postman GUI karena eksekusi menggunakan CLI. `python3 scripts/check-release.py` memeriksa pemetaan metode/path serta sintaks JS seluruh sembilan collection, bukan eksekusi HTTP.

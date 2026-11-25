@@ -1,18 +1,17 @@
-# Email draft — send only after verifying repository link and evidence
+# Draf email pengumpulan
 
-To: inovamedika.career@gmail.com
-Subject: Senior Programmer_Pengumpulan Real Case Test_Agastyo Atallah Al-Ardhi
+Kepada: inovamedika.career@gmail.com
+Subjek: Senior Programmer_Pengumpulan Real Case Test_Agastyo Atallah Al-Ardhi
 
 Yth. Tim Rekrutmen PT Inova Medika Solusindo,
 
 Terima kasih atas kesempatan yang diberikan kepada saya untuk mengikuti tahap Real Case Test posisi Senior Programmer.
 
-Melalui email ini saya menyampaikan hasil pengerjaan studi kasus Sistem Pelayanan Rawat Jalan Terintegrasi menggunakan React.js, Yii2, Node.js, dan PostgreSQL.
+Melalui email ini, saya menyampaikan hasil pengerjaan studi kasus Sistem Pelayanan Rawat Jalan Terintegrasi menggunakan React.js, Yii2, Node.js, dan PostgreSQL.
 
-Repository: [ISI LINK REPOSITORY YANG DAPAT DIAKSES]
-Dokumentasi, petunjuk instalasi, dan pengujian: tersedia pada README dan folder docs di repository.
+Tautan repository: [ISI URL REPOSITORY YANG SUDAH TERVERIFIKASI]
 
-[ISI STATUS PENGUJIAN AKTUAL SECARA JUJUR, TERMASUK KETERBATASAN APABILA ADA. HAPUS BARIS INI SETELAH DIISI.]
+Dokumentasi arsitektur, API, ERD, petunjuk instalasi, serta bukti pengujian tersedia pada README dan folder docs. Pengujian lokal mencakup alur pelayanan dari pendaftaran hingga pembayaran, 844 pemeriksaan HTTP melalui QA terisolasi, serta eksekusi 51 request Postman Collection melalui Newman dengan 133 assertion tanpa kegagalan. Seluruh data dan pembayaran merupakan simulasi; batasan pengujian dijelaskan pada dokumentasi.
 
 Saya siap memberikan penjelasan lebih lanjut terkait arsitektur, alur bisnis, penanganan konkurensi, idempotency, dan keputusan teknis yang digunakan.
 
@@ -21,4 +20,6 @@ Terima kasih atas waktu dan perhatian Bapak/Ibu.
 Hormat saya,
 Agastyo Atallah Al-Ardhi
 
-Do not send placeholders. Attach ZIP only if required/helpful; repository access is mandatory. No email has been sent.
+---
+
+Ganti placeholder sebelum mengirim. Pastikan evaluator memiliki akses. Lampirkan ZIP hanya jika diperlukan. Draf ini belum dikirim.

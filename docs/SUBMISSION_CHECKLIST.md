@@ -1,42 +1,30 @@
-# Submission gate — PT Inova Medika Solusindo
+# Daftar periksa pengumpulan technical test
 
-The assignment requires an accessible Git repository, source code, DB/ERD/migrations, technical documentation, actual screenshots and service-flow evidence, invoice/receipt, Node implementation proof, test cases, actual Postman proof, and critical unit/integration tests. Deadline from assignment: 72 calendar hours from receipt; follow explicit HR deadline if provided. The previously recorded HR deadline is Wednesday, 25 November 2026, 14:00 WIB; verify it against the original email (the PDF itself states 72 hours). Use only dummy data.
+Keluaran sesuai studi kasus PT Inova Medika Solusindo: Git repository yang dapat diakses evaluator, tiga source, schema/ERD/migration, arsitektur/API/instalasi/keputusan, screenshot aktual, alur pasien, invoice/kuitansi, bukti Node, Postman dan pengujian kritis. Deadline yang diinformasikan HR: Rabu 25 November 2026 pukul 14.00 WIB; ikuti email asli (PDF menyebut 72 jam kalender sejak diterima).
 
-## Release gate (v1.1.0 RC; no runtime PASS yet)
+- [x] Source, schema, ERD, empat migration dan dokumentasi.
+- [x] Regression statis dan build Docker aktual.
+- [x] Backup, migration-only upgrade, fingerprint 23 tabel bisnis identik.
+- [x] Tujuh kelompok UAT alur utama, 34 screenshot dan tiga PDF.
+- [x] QA terisolasi: 844 HTTP checks, invariant dan outage lulus.
+- [x] Postman melalui Newman: 51 request, 133 assertion lulus; bukti Node melalui request 24–26/38.
+- [x] Commit lokal dan targeted secret scan pada 243 file sebelum lokalisasi dokumentasi.
+- [ ] Periksa ulang dokumentasi/secret scan setelah perubahan dokumentasi.
+- [ ] Pastikan akses evaluator ke repository, verifikasi README dan bukti.
+- [ ] Kirim email dengan URL aktual, tanpa placeholder.
 
-- [x] Source code and migrations included; technical documentation and ERD included.
-- [x] Static regression evidence included (see evidence/v1.1.0-static-checks.txt for exact results).
-- [ ] Existing UAT backup, business fingerprint diff and migration-only upgrade (see UPGRADE_V1.1.0.md).
-- [ ] Targeted UAT (see FINAL_UAT.md).
-- [ ] Install dependencies, generate real lockfiles, review advisories, build all services.
-- [ ] Run isolated runtime QA, resolve failures; rerun, preserve actual summary and logs.
-- [ ] Execute Postman collections; capture/export actual results.
-- [ ] Complete manual UI/UX checklist, actual screenshots and print PDF.
-- [ ] Publish accessible Git repository; verify evaluator access and clean clone instructions.
-- [ ] Review evidence for secrets, real identities and misleading claims; send email with repository link.
+## Peta bukti
 
-## Suggested evidence filenames (all pending; names are suggestions, not existing screenshots)
+| Kebutuhan | Lokasi |
+|---|---|
+| Dashboard | `evidence/screenshots/01-dashboard-kpi.png` dan 02–03 |
+| Master dan pendaftaran | `evidence/screenshots/04-master-patient-modal.png` dan 05–06 |
+| Dokter dan review | `evidence/screenshots/07-doctor-queue.png` dan 08–19 |
+| Laboratorium dan farmasi | `evidence/screenshots/20-lab-queue.png` dan 21–26 |
+| Tagihan dan pembayaran | `evidence/screenshots/27-billing-list.png` dan 28–34 |
+| PDF | `evidence/billing/INV-000003.pdf`, `PAY-000003.pdf`, `PAY-000004.pdf` |
+| Postman dan Node | `evidence/postman/newman-summary.txt`, `newman-result.json` |
+| QA/SQL | `evidence/automated-qa/runtime-excerpts.txt` |
+| Indeks lengkap | [Bukti aktual](evidence/FINAL_RUNTIME_EVIDENCE.md) |
 
-| Filename | Required capture | Status |
-|---|---|---|
-| 01-admin-dashboard.png | Actual dashboard and date filter | Pending |
-| 02-master-patients.png | Dummy patient/MRN table | Pending |
-| 03-registration-queue.png | New visit and queue | Pending |
-| 04-doctor-record.png | Saved dummy EMR and vitals | Pending |
-| 05-doctor-services.png | Procedure/Rx/lab tabs | Pending |
-| 06-lab-result.png | Lab result and order completed | Pending |
-| 07-node-api.png | Postman or Network Node request response, redact bearer | Pending |
-| 08-pharmacy-dispense.png | Dispensed Rx and stock change | Pending |
-| 09-invoice-unpaid.png | Four actual charge categories | Pending |
-| 10-payment-partial.png | Partial balance and receipt | Pending |
-| 11-payment-paid.png | Paid/completed and two receipts | Pending |
-| 12-invoice.pdf | Actual browser print output | Pending |
-| 13-receipt-cash.pdf | Actual first receipt | Pending |
-| 14-receipt-noncash.pdf | Actual final receipt | Pending |
-| 15-reports.png | Actual drill-down | Pending |
-| 16-user-audit.png | User roles and audit metadata | Pending |
-| 17-postman-run.json / .png | Actual runner results | Pending |
-| 18-runtime-summary.json | Scrubbed actual QA summary | Pending |
-| 19-query-plans.txt | Actual EXPLAIN ANALYZE and dataset sizes | Pending |
-
-Store selected captures in `docs/evidence/runtime/` (create after testing). Add an index with date, environment/browser, visit ID, expected vs observed, file name and status. Do not substitute illustrative screenshots or fabricated evidence. Do not include tokens, password prefix, secrets, or real patient data. If deadline arrives before full verification, disclose which items are pending and what did pass; do not claim all requirements were proven.
+Screenshot pengguna/audit final, pengujian responsive terperinci, lockfile aktual dan audit dependency belum tersedia lengkap; jangan menyatakan sebaliknya. Catat keterbatasan pada README. File mentah tetap privat. Jangan unggah PDF soal rekrutmen tanpa izin, data nyata, token atau backup. Akses repository tidak dapat digantikan ZIP semata. Tidak ada email dikirim oleh aplikasi.

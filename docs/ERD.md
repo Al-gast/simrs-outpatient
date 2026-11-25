@@ -1,78 +1,75 @@
-# Database design
+# Desain basis data dan ERD
 
-PostgreSQL, 22 baseline domain tables + login_attempts + stock_adjustment_requests (24 application tables), 5 reporting views, plus Yii migration metadata. `database/schema.sql` is the column-level baseline. Install through the three Yii migrations; the baseline is not a separate installation route. IDs bigint identity, monetary values integer IDR bigint, timestamps timestamptz, visit_date in Asia/Jakarta. Three dedicated sequences generate MRN, invoice and receipt references (gaps are acceptable; queue numbers are separate transactional counters).
+PostgreSQL: 22 tabel domain awal, `login_attempts` dan `stock_adjustment_requests` (24 tabel aplikasi), lima view pelaporan serta tabel metadata migration Yii. Fingerprint upgrade mencakup 23 tabel bisnis, tidak termasuk `login_attempts` dan metadata migration. ID bigint, Rupiah bigint, timestamp `timestamptz`, tanggal kunjungan WIB. Sequence rekam medis, invoice dan bukti pembayaran terpisah dari counter antrean. Instalasi melalui empat migration Yii; `database/schema.sql` adalah schema awal, bukan instalasi tambahan.
+
+![ERD logis](diagrams/erd.svg)
 
 ```mermaid
 erDiagram
- CLINICS ||--o{ DOCTOR_SCHEDULES : offers
- MEDICAL_STAFF ||--o{ DOCTOR_SCHEDULES : practices
- MEDICAL_STAFF o|--o| USERS : account
- CLINICS ||--o{ QUEUE_COUNTERS : numbers
- PATIENTS ||--o{ VISITS : attends
- MEDICAL_STAFF ||--o{ VISITS : treats
- CLINICS ||--o{ VISITS : hosts
- DOCTOR_SCHEDULES ||--o{ VISITS : scheduled
- VISITS ||--o| MEDICAL_RECORDS : documents
- VISITS ||--o{ VISIT_PROCEDURES : receives
- PROCEDURES ||--o{ VISIT_PROCEDURES : references
- VISITS ||--o| PRESCRIPTIONS : prescribed
- PRESCRIPTIONS ||--|{ PRESCRIPTION_ITEMS : contains
- MEDICINES ||--o{ PRESCRIPTION_ITEMS : references
- MEDICINES ||--o{ STOCK_MOVEMENTS : tracks
- PRESCRIPTION_ITEMS o|--o| STOCK_MOVEMENTS : dispenses
- VISITS ||--o{ LAB_ORDERS : requests
- LAB_ORDERS ||--|{ LAB_ORDER_ITEMS : contains
- LAB_TESTS ||--o{ LAB_ORDER_ITEMS : references
- LAB_ORDER_ITEMS ||--o{ LAB_RESULT_EVENTS : accepted_events
- VISITS ||--o| INVOICES : billed
- INVOICES ||--|{ INVOICE_ITEMS : contains
- INVOICES ||--o{ PAYMENTS : receives
- USERS ||--o{ AUDIT_LOGS : acts
- USERS ||--o{ VISITS : registers
- USERS ||--o{ PAYMENTS : collects
- MEDICINES ||--o{ STOCK_ADJUSTMENT_REQUESTS : adjusts
- USERS ||--o{ STOCK_ADJUSTMENT_REQUESTS : requests
- STOCK_MOVEMENTS ||--o| STOCK_ADJUSTMENT_REQUESTS : records
+ CLINICS ||--o{ DOCTOR_SCHEDULES : menyediakan
+ MEDICAL_STAFF ||--o{ DOCTOR_SCHEDULES : praktik
+ MEDICAL_STAFF o|--o| USERS : akun
+ CLINICS ||--o{ QUEUE_COUNTERS : menomori
+ PATIENTS ||--o{ VISITS : berkunjung
+ MEDICAL_STAFF ||--o{ VISITS : memeriksa
+ CLINICS ||--o{ VISITS : melayani
+ DOCTOR_SCHEDULES ||--o{ VISITS : terjadwal
+ VISITS ||--o| MEDICAL_RECORDS : mencatat
+ VISITS ||--o{ VISIT_PROCEDURES : menerima
+ PROCEDURES ||--o{ VISIT_PROCEDURES : merujuk
+ VISITS ||--o| PRESCRIPTIONS : diresepkan
+ PRESCRIPTIONS ||--|{ PRESCRIPTION_ITEMS : memuat
+ MEDICINES ||--o{ PRESCRIPTION_ITEMS : merujuk
+ MEDICINES ||--o{ STOCK_MOVEMENTS : mencatat
+ PRESCRIPTION_ITEMS o|--o| STOCK_MOVEMENTS : menyerahkan
+ VISITS ||--o{ LAB_ORDERS : meminta
+ LAB_ORDERS ||--|{ LAB_ORDER_ITEMS : memuat
+ LAB_TESTS ||--o{ LAB_ORDER_ITEMS : merujuk
+ LAB_ORDER_ITEMS ||--o{ LAB_RESULT_EVENTS : event_diterima
+ VISITS ||--o| INVOICES : ditagihkan
+ INVOICES ||--|{ INVOICE_ITEMS : memuat
+ INVOICES ||--o{ PAYMENTS : menerima
+ USERS ||--o{ AUDIT_LOGS : bertindak
+ USERS ||--o{ VISITS : mendaftarkan
+ USERS ||--o{ PAYMENTS : menerima
+ MEDICINES ||--o{ STOCK_ADJUSTMENT_REQUESTS : menyesuaikan
+ USERS ||--o{ STOCK_ADJUSTMENT_REQUESTS : meminta
+ STOCK_MOVEMENTS ||--o| STOCK_ADJUSTMENT_REQUESTS : mencatat
 ```
 
-For legibility the diagram omits some actor FKs (medical record, stock, prescription, lab, invoice); SQL is authoritative. Invoice item source is category-specific and validated by service, not a polymorphic FK. Roles are a fixed checked value in users rather than an unnecessary roles table. Doctors and other medical staff share a master with profession; Yii validates doctor-only references.
+Diagram menyederhanakan FK aktor untuk keterbacaan; SQL dan migration adalah acuan constraint lengkap. Sumber invoice item ditentukan kategori dan divalidasi service, bukan FK polimorfik. Peran adalah nilai terbatas pada `users`.
 
-| Table group | Table and role |
+| Kelompok | Tabel dan fungsi |
 |---|---|
-| Identity | users (credentials/role/token version), patients (MRN/identity), medical_staff (doctors and other staff) |
-| Masters | clinics (registration fee), doctor_schedules, procedures, medicines (stock & price), lab_tests |
-| Registration | queue_counters (clinic/date), visits (patient/doctor/clinic/schedule, status & fee snapshot) |
-| Clinical | medical_records (one per visit/version), visit_procedures (many with price snapshots) |
-| Pharmacy | prescriptions, prescription_items, stock_movements (ledger) |
-| Laboratory | lab_orders, lab_order_items, lab_result_events (idempotency ledger) |
-| Finance | invoices (one per visit/revision), invoice_items (price snapshots), payments (unique key/receipt) |
-| Audit | audit_logs (actor, reason, before/after, request_id) |
+| Identitas | `users`, `patients`, `medical_staff` |
+| Master | `clinics`, `doctor_schedules`, `procedures`, `medicines`, `lab_tests` |
+| Kunjungan | `queue_counters` per poli/tanggal, `visits` dengan snapshot biaya |
+| Klinis | `medical_records` satu per kunjungan dengan versi, `visit_procedures` dengan snapshot harga |
+| Farmasi | `prescriptions`, `prescription_items`, `stock_movements`, `stock_adjustment_requests` |
+| Lab | `lab_orders`, `lab_order_items`, `lab_result_events` |
+| Keuangan | `invoices` satu per kunjungan/revisi, `invoice_items`, `payments` |
+| Audit dan autentikasi | `audit_logs`, `login_attempts` untuk pembatasan login |
 
-## Constraints and invariants
+## Constraint dan invariant
 
-- Unique MRN and non-null identity_no, master codes, normalized usernames. All referenced history is protected by FK default NO ACTION; soft deactivation when in use.
-- Composite schedule FK on visits matches doctor and clinic; service validates active, weekday and doctor profession; schedule overlap checked with staff row lock.
-- Visit uniqueness patient/clinic/date and queue uniqueness clinic/date/number; counter primary key clinic/date.
-- Nonnegative stock and prices, positive quantities/payment, nonnegative invoice total, one record/prescription/invoice per visit. Stock balance changes only via transactional stock ledger; DB constraint alone does not ensure movement reconciliation.
-- Unique payment idempotency key and lab event key. Overpayment and valid state transitions are service invariants protected by row locks, not implicit SQL CHECKs across tables.
-- Payment status derived from committed sums. Invoice total and item sum invariant checked when rebuilding invoice under lock. Immutable prices copied into transactional lines.
-- Record version and invoice revision guard against stale writes. Migration 000003 enforces append-only access for core runtime on audit_logs, payments, stock_movements, lab_result_events and stock_adjustment_requests. The owner retains administrative power.
+- Nomor RM, kode master, username ternormalisasi dan `identity_no` non-null unik. FK melindungi riwayat; data berreferensi dapat dinonaktifkan, tidak dihapus paksa.
+- FK komposit jadwal memastikan dokter dan poli sesuai. Service memvalidasi profesi, status aktif, hari dan tumpang tindih jadwal dengan lock tenaga medis.
+- Unik `(patient_id,clinic_id,visit_date)` dan `(clinic_id,visit_date,queue_number)`. Counter memiliki PK poli/tanggal.
+- Stok/harga nonnegatif, kuantitas/pembayaran positif. Satu rekam medis, resep dan invoice per kunjungan. Satu order lab per kunjungan adalah invariant service dengan visit lock, bukan unique constraint baseline.
+- Kunci idempotency pembayaran dan lab unik. Overpayment dicegah service di bawah lock; constraint lintas tabel tidak diasumsikan sebagai CHECK.
+- Total invoice sama dengan jumlah item; tarif transaksi menggunakan snapshot. Versi klinis dan revisi invoice mencegah penulisan stale. Ledger audit, pembayaran, stok, event lab, dan penyesuaian stok append-only bagi akun runtime Core; owner tetap berwenang secara administratif.
 
-## Reporting views and indexes
+## View dan indeks
 
-`reporting.visits`, `reporting.procedures`, `reporting.revenue`, `reporting.medicine_usage`, `reporting.invoice_status` expose non-clinical rows. Node receives read grants only on these views. SQL defines indexes for visit date/clinic, doctor queue, patient history, lower-case prefix name search, schedule, pending prescriptions/lab, lab visit, payments by invoice/date, inventory movements by date and entity audit. Use query plans to confirm actual use rather than assuming every index improves performance.
+`reporting.visits`, `reporting.procedures`, `reporting.revenue`, `reporting.medicine_usage`, `reporting.invoice_status` hanya mengekspos data nonklinis. Indeks untuk tanggal/poli, antrean dokter, riwayat pasien, pencarian prefix, jadwal, status resep/lab, pembayaran invoice/tanggal, mutasi stok, audit entitas. Gunakan EXPLAIN ANALYZE untuk verifikasi; indeks biasa belum tentu membantu pencarian contains.
 
-## Foundation implementation delta
+## Migration
 
-`login_attempts(bucket PK, window_start, attempts)` is an auth infrastructure table without foreign keys; it tracks hashed username/IP and IP throttle buckets. Yii migration metadata is not a domain table. Domain schema stays unchanged.
+| Nomor | Perubahan |
+|---|---|
+| 000001 | Schema awal, hak akses, `login_attempts(bucket,window_start,attempts)` |
+| 000002 | Indeks pelaporan dan penggantian view invoice per invoice |
+| 000003 | Ledger `stock_adjustment_requests(event_key,medicine_id,actor_id,payload_hash,movement_id,created_at)`, indeks billing, pembatasan perubahan ledger |
+| 000004 | Sequence `staff_code_seq`, `clinic_code_seq`, `procedure_code_seq`, `medicine_code_seq`, `lab_test_code_seq`; USAGE/SELECT untuk Core |
 
-## Migration deltas (Phase 2–9)
-The Phase 1 baseline remains unchanged. Migration 000001 adds `login_attempts`. Migration 000002 adds reporting indexes and replaces the invoice reporting view. Migration 000003 adds `stock_adjustment_requests` (`event_key` UUID PK, `medicine_id` FK, `actor_id` FK, `payload_hash`, `movement_id` unique FK to `stock_movements`, `created_at`) and an index for billing queue; it restricts Core ledger permissions. One adjustment key identifies exactly one movement; a movement has at most one request key. Legacy movements need no backfill. Apply all Yii migrations; do not apply this schema file independently to an existing DB.
-
-`lab_orders.visit_id` is not unique in baseline SQL; one order per visit is an application invariant enforced under the visit lock. `login_attempts` is standalone. See the SQL and migration files for exact column constraints.
-
-Standalone diagram: [SVG logical ERD](diagrams/erd.svg) (editable [DOT source](diagrams/erd.dot)). See Mermaid and SQL for exact constraints.
-
-### v1.0.1 schema addendum
-
-Migration `m261124_000004_master_codes` adds five independent PostgreSQL sequences for generated master codes. No table columns, relationships, historical identifiers, or existing constraints are changed. Core receives USAGE/SELECT only on these new sequences; the reporting role receives none. Existing table `audit_logs` supports section history through the indexed entity lookup.
+Migration 000004 tidak mengubah baris bisnis atau nomor lama, dan `safeDown` menolak rollback setelah sequence dipakai. Upgrade aktual dari v1.0.0 membuktikan fingerprint 23 tabel tetap identik. Backup/restore tetap diperlukan; fingerprint tidak mencakup semua properti database. Lihat [schema](../database/schema.sql), [migration](../backend-yii/migrations/) dan [panduan upgrade](UPGRADE_V1.1.0.md).

@@ -1,7 +1,17 @@
-# Phase 10 — final packaging (v1.0.0)
+# Catatan fase 10 — Pengemasan awal v1.0.0
 
-Base: cumulative Phase 9 archive. Scope: documentation correction, release metadata, Postman workflow, static regression and archive verification; no new business feature or database migration. Design tokens and functional services preserved. Version v1.0.0 is the requested source package name, not a claim of fully verified production readiness.
+Ringkasan historis checkpoint source. Kondisi pada saat fase ini berbeda dari status pengujian v1.1.0 saat ini.
 
-The original five-page assignment was reopened and matched to A–G in TRACEABILITY.md. API reference current route index replaces obsolete planned routes. ERD includes both infrastructure tables and the stock adjustment ledger. Prior phase logs retained as historical evidence. Documentation examples and expected values are illustrative, not runtime results.
+## Implementasi
 
-No registry-resolved lockfiles, Docker runtime, actual Postman run, screenshots, printed files, remote repository or measured performance are fabricated. See final static log and submission gate. No original recruitment PDF redistributed. Before submission run QA on Mac, fix actual failures, collect evidence and publish accessible Git repository. No email sent.
+Konsolidasi Phase 9, dokumentasi sesuai bagian A–G, API rute kini menggantikan rute rencana, ERD/ledger, koleksi Postman, metadata dan paket source. Tidak ada modul atau migration baru.
+
+## Verifikasi saat fase ini
+
+Log statis final, validasi arsip dan pemetaan persyaratan. Bukti asli: [log statis fase 10](evidence/phase10-static-checks.txt).
+
+## Keterbatasan historis
+
+Tidak ada lockfile, runtime, remote atau bukti browser yang dibuat-buat pada fase pengemasan. Pengujian MacBook kemudian dilakukan terpisah.
+
+Status terbaru dan kontrak yang menggantikan keputusan awal: [README](../README.md), [API](API.md), [alur transaksi](WORKFLOW.md), [bukti aktual](evidence/FINAL_RUNTIME_EVIDENCE.md).

@@ -1,67 +1,53 @@
-# Verification guide — v1.0.0
+# Panduan verifikasi v1.1.0
 
-## Evidence levels
+## Hasil aktual
 
-- Actual authoring evidence: `evidence/phase10-static-checks.txt` (final dependency-free tests, static validation, runner dry-run). Earlier logs retained as historical records.
-- Runtime pending: Docker build, full package-based typecheck/tests, Yii/PostgreSQL migrations, HTTP and concurrency, database grants, Postman, browser/print, query plans. No screenshots or runtime outputs included as evidence.
-- `TEST_CASES.md` defines expected outcomes; `QA_MANUAL_CHECKLIST.md` defines 18 manual checks. A planned test is not a pass.
+Pada 25 November 2026, MacBook M1: build Docker React/Node/Yii/migrate dan pengujian paket lulus; migration 000004 diterapkan tanpa seed ulang; fingerprint 23 tabel bisnis identik; tujuh kelompok UAT utama lulus; 844 pemeriksaan HTTP, 656 assertion PHP, 10 invariant DB sebelum/sesudah outage, dan 51 request Newman dengan 133 assertion lulus. Regression statis 1.554 assertion (termasuk 656 PHP) dicatat sebelum merge lokal JSONB. Jangan menjumlahkan angka yang tumpang tindih sebagai test coverage. Bukti: [indeks aktual](evidence/FINAL_RUNTIME_EVIDENCE.md), [statis](evidence/v1.1.0-static-checks.txt), [Newman](evidence/postman/newman-summary.txt).
 
-## Recommended Mac run (isolated dummy stack)
+## Menjalankan QA terisolasi
 
-From extracted root, start Docker Desktop. Ensure ports 3000/3001/8080 free, and do not run a separate stack concurrently.
+Pastikan Docker Desktop berjalan, port 3000/3001/8080 bebas. Hentikan stack normal tanpa `-v`. Jangan jalankan smoke test mutasi pada DB UAT existing.
 
 ```bash
 python3 scripts/qa-runtime.py --dry-run --outage
 python3 scripts/qa-runtime.py --outage --keep
 ```
 
-Runner creates random secrets and separate Compose project and volumes, builds images, waits for health, checks migration down/up on fresh seed, runs PHP policies, HTTP smoke tests, grants/invariants and query plans. `--outage` adds Node stop/recovery. `--keep` retains the stack for manual testing and prints exact workdir/cleanup. Without it, only isolated project is removed. On preflight failure (e.g. Docker missing) there may be no summary file; save terminal error. On stage failure see `qa-results/<run-id>/summary.json` and corresponding log. Fix root cause and rerun in a new isolated environment; do not label a failed stage PASS. Use only dummy data. Test scripts write permanent dummy transactions. They are not a production health check.
+Runner membuat rahasia, proyek Compose dan volume terpisah, build sequential, health, rollback/reapply migration pada data dummy, policy, HTTP, grant/invariant, EXPLAIN dan outage Node. `--keep` mempertahankan stack untuk Newman; gunakan direktori/nama proyek yang dicetak. Tanpa opsi itu hanya QA terisolasi dihapus. Simpan `qa-results/<run-id>/summary.json` dan log privat; jika preflight gagal, simpan error terminal. Perbaiki root cause dan jalankan ulang pada QA baru, jangan ubah label hasil yang gagal.
 
-| Stage | Command/script | Expected proof |
+| Tahap | Skrip | Bukti yang diperiksa |
 |---|---|---|
-| Foundation | smoke.py | 6 logins; role probes; invalid auth/revocation |
-| Master | master-smoke.py | CRUD, validation, deletion, stock |
-| Registration | visit-smoke.py | concurrent duplicates, distinct queue, assignment |
-| Clinical | clinical-smoke.py --db-check | stale version, snapshots, history and audit |
-| Ancillary | ancillary-smoke.py --db-check | stock race, multi-item rollback, lab UUID replay |
-| Billing | billing-smoke.py --db-check | four categories, revision conflict, two cashiers, partial/paid |
-| Reports/Admin | report-admin-smoke.py | independent SQL reconciliation, filters, account changes |
-| Security | security-smoke.py | cross-doctor IDOR and adjustment replay |
-| DB | verify-db-grants.sh; verify-invariants.sh | permission failures on prohibited operations; stock/payment/visit invariants |
-| Outage | ancillary-smoke.py --db-check --outage | Node unavailable/recovered; direct Core fallback |
-| Performance | explain-reporting.sql | actual SQL plans/buffers; not a load benchmark |
+| Dasar | `smoke.py` | Login enam role, penolakan dan revokasi |
+| Master | `master-smoke.py` | CRUD, validasi, hapus/status, stok |
+| Pendaftaran | `visit-smoke.py` | Duplikat bersamaan, nomor unik, penugasan |
+| Klinis | `clinical-smoke.py --db-check` | Versi stale, snapshot, histori dan audit |
+| Penunjang | `ancillary-smoke.py --db-check` | Race stok, rollback multi-item, replay lab |
+| Billing | `billing-smoke.py --db-check` | Empat kategori, revisi, dua kasir, pembayaran sebagian/lunas |
+| Laporan/admin | `report-admin-smoke.py` | Perbandingan SQL, filter, akun |
+| Keamanan | `security-smoke.py` | IDOR lintas dokter, replay penyesuaian stok, sesi cookie/bearer lama |
+| DB | `verify-db-grants.sh`; `verify-invariants.sh` | Operasi terlarang ditolak, invariant transaksi |
+| Gangguan | `ancillary-smoke.py --db-check --outage` | Node berhenti/pulih, fallback Core |
+| Performa | `explain-reporting.sql` | Plan SQL dan buffer, bukan benchmark beban |
 
-For standalone dependency-free regression, install PHP CLI, Node, npm and global TypeScript then `sh scripts/check-static.sh`. No vendor/node_modules needed for this subset. It is not a substitute for `npm test` and `npm run build` in both JS projects or actual database transactions.
+## Regression statis dan paket
 
-## Postman and UI
+```bash
+sh scripts/check-static.sh
+python3 scripts/check-release.py
+```
 
-Follow [Postman guide](../postman/README.md) and [demo walkthrough](DEMO_WALKTHROUGH.md). Run the end-to-end collection in order on a disposable DB; export actual run summary with assertions, redact secrets. Sequential Postman replay is not proof of concurrency; retain parallel HTTP/SQL evidence from QA. Complete manual browser tests including print and responsive layouts.
+Subset statis membutuhkan PHP CLI, Node/npm dan TypeScript global. Memeriksa sintaks, policy dan helper frontend, DOM double untuk print, routing, format, payload akun, grafik/agregat, serta pemetaan 192 request di sembilan collection dan 198 skrip JS Postman. Tidak menggantikan full build/Vitest atau DB nyata. Build paket berjalan dalam Docker. `frontend/tests/` dan `backend-node/tests/` memuat pengujian berbasis paket. Uji browser khusus tetap diperlukan untuk responsive, popup, keyboard, navigation guard, kondisi storage dan cross-tab.
 
-## Performance evidence
+## Postman/Newman
 
-Record DB version, CPU/RAM, dataset row counts (visits, payments, stock_movements), date range, exact query, execution plan/buffers, execution time and HTTP timing separately. Compare aggregate results against SQL. Small dummy dataset does not establish production throughput. `EXPLAIN ANALYZE` executes queries; use disposable data. No fabricated benchmark or SLA.
+Ikuti [panduan koleksi](../postman/README.md). End-to-End terdiri dari 51 request berurutan. Hasil aktual sudah lulus melalui Newman. Pengujian sequential bukan bukti concurrency; gunakan QA paralel dan invariant SQL. Simpan ringkasan yang telah disaring; laporan mentah dapat memuat kredensial.
 
-## Result log template (fill only after execution)
+## Performa dan batasan bukti
 
-| ID/stage | Date, environment, command | Expected | Observed | PASS/FAIL/BLOCKED | Evidence path |
+Catat versi PostgreSQL, CPU/RAM, jumlah baris, periode, query/plan/buffer, waktu SQL dan HTTP secara terpisah. EXPLAIN ANALYZE menjalankan query. Dataset dummy kecil tidak membuktikan SLA/throughput. Hasil terpilih ada pada log QA; dependency audit, lockfile, full responsive coverage dan penilaian keamanan independen belum terverifikasi lengkap.
+
+| ID/tahap | Tanggal/lingkungan | Harapan | Observasi | Status | Bukti |
 |---|---|---|---|---|---|
-| Runtime | — | All required checks pass | Not run | PENDING | — |
+| Contoh format pencatatan | Isi setelah eksekusi | Isi | Isi | Lulus/gagal/terblokir | Path log/screenshot |
 
-Keep raw QA results local; copy only scrubbed evidence under `docs/evidence/runtime/` for submission. Never publish `.env`, credentials, bearer tokens, request secrets, real identities or full clinical data. Review exported Postman JSON for secrets.
-
-## v1.0.1 regression addendum
-
-`master-smoke.py` adds omitted-code generation across five resources, concurrent codes, manual collision, strict deletion, explicit activate/deactivate and role denial. `clinical-smoke.py` and `ancillary-smoke.py` now test first saves without reason, rejected later saves, and history after clearing. `report-admin-smoke.py` tests restore after credential reset/deactivation; `security-smoke.py` asserts CORS, scoped cookie, explicit-origin rejection, restore TTL, cookie-only API denial, and logout revocation. `verify-db-grants.sh` checks new sequence privileges. These HTTP tests simulate cookie headers; real browser persistence is separately tested via `QA_MANUAL_CHECKLIST.md`. `qa-runtime.py --outage` runs all these stages in an isolated dummy project. Authoring results for this release are static only.
-
-## v1.0.2 presentation regression
-
-`sh scripts/check-static.sh` now also compiles `frontend/src/lib/presentation.ts` under strict TypeScript and exercises grouped Rupiah input, rejection of malformed amounts, large exact integer strings, date-only vs timezone-aware timestamps, badge mapping, role-specific master navigation and signed stock adjustment conversion. `frontend/tests/presentation.test.ts` is included in the normal `npm test`/Docker build, but not executed in the authoring environment without package dependencies. Actual static output and full-build limitation are in `evidence/v1.0.2-static-checks.txt`. Browser-level behavior (Ant Design Modal, input caret, dropdown layering and responsive layout) cannot be inferred from pure helper tests. Execute UI102 cases in `QA_MANUAL_CHECKLIST.md` after the final upgrade. Full runtime regression and Postman remain pending for v1.0.1+.
-
-## v1.0.3 workflow regression
-`sh scripts/check-static.sh` includes strict compilation of workflow and print-document helpers, role route policy, state transition truth table, display-only transaction ID/search normalization, invoice line sorting, exact progress, and minimal DOM-double execution of print document generator. DOM double does not verify browser CSS, popup permission, real PDF, React Router behavior, or Ant Design integration. Vitest workflow tests are included for future full build. Actual results: `evidence/v1.0.3-static-checks.txt`; execute WF103-01–16 on Mac after combined release and run isolated automated QA again.
-
-## v1.0.4 reporting and admin regression
-`sh scripts/check-static.sh` runs dependency-free dashboard/account/audit helper assertions. `scripts/report-admin-smoke.py` now compares invoice cohort sums with direct base-table SQL, verifies staff names, runs separate account reset/status operations and exact audit filters. The HTTP/SQL suite is only for a disposable isolated QA database, not the preserved UAT volume. Run ADM104-01–14 in `QA_MANUAL_CHECKLIST.md` on final Mac runtime; actual static output in `evidence/v1.0.4-static-checks.txt`.
-
-## v1.1.0 release checks
-Run `sh scripts/check-static.sh` and `python3 scripts/check-release.py`. The latter statically checks all nine collections against current REST method/path patterns and parses JS event scripts; it does not run Postman. The isolated QA runner now builds sequentially, then starts services. `security-smoke.py` includes a stale bearer vs newer cookie case. Use FINAL_UAT.md and UPGRADE_V1.1.0.md for actual runtime, database fingerprint and release gates.
+Gunakan data dummy, jangan publish `.env`, token, backup, laporan raw atau data medis asli.

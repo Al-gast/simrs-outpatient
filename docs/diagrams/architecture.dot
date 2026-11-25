@@ -1,14 +1,14 @@
 digraph architecture {
- graph [rankdir=LR,bgcolor="white",pad=.35,nodesep=.6,ranksep=.8,fontname="Helvetica",label="SIMRS Outpatient • Service ownership",labelloc=t,fontsize=20];
+ graph [rankdir=LR,bgcolor="white",pad=.35,nodesep=.6,ranksep=.8,fontname="Helvetica",label="SIMRS Outpatient • Tanggung jawab layanan",labelloc=t,fontsize=20];
  node [shape=box,style="rounded,filled",fillcolor="#F0FDFA",color="#0F766E",fontname="Helvetica",fontcolor="#0F172A",margin=".2,.15"];
  edge [fontname="Helvetica",fontsize=10,color="#64748B",fontcolor="#334155"];
- browser [label="Browser\nSix role workspaces",fillcolor="#F8FAFC",color="#94A3B8"];
- react [label="React + TypeScript\nlocalhost:3000\nUI / print / forms"];
- yii [label="Yii2 core\nlocalhost:8080\nAuth + domain writes"];
- nodeapi [label="Node.js support\nlocalhost:3001\nLab bridge + reports"];
- postgres [shape=cylinder,label="PostgreSQL 16\nCore tables + ledgers",fillcolor="#EFF6FF",color="#2563EB"];
- views [label="5 reporting views\nSELECT only",fillcolor="#EFF6FF",color="#2563EB"];
- external [label="Simulated lab client",fillcolor="#F8FAFC",color="#94A3B8"];
- browser -> react; react -> yii [label="REST + bearer"]; react -> nodeapi [label="REST + bearer"]; external -> nodeapi [label="Lab + event key"];
- nodeapi -> yii [label="Auth introspection\nForward lab + same key",constraint=false]; yii -> postgres [label="Read/write\ntransactions"]; nodeapi -> views [label="Read only"]; views -> postgres [label="Derived rows",style=dashed];
+ browser [label="Peramban\nEnam ruang kerja peran",fillcolor="#F8FAFC",color="#94A3B8"];
+ react [label="React + TypeScript\nlocalhost:3000\nUI / cetak / form"];
+ yii [label="Yii2 utama\nlocalhost:8080\nAutentikasi + transaksi"];
+ nodeapi [label="Node.js pendukung\nlocalhost:3001\nIntegrasi lab + laporan"];
+ postgres [shape=cylinder,label="PostgreSQL 16\nTabel inti + ledger",fillcolor="#EFF6FF",color="#2563EB"];
+ views [label="5 view pelaporan\nSELECT saja",fillcolor="#EFF6FF",color="#2563EB"];
+ external [label="Klien lab simulasi",fillcolor="#F8FAFC",color="#94A3B8"];
+ browser -> react; react -> yii [label="REST + bearer"]; react -> nodeapi [label="REST + bearer"]; external -> nodeapi [label="Lab + kunci event"];
+ nodeapi -> yii [label="Introspeksi identitas\nTeruskan lab + key sama",constraint=false]; yii -> postgres [label="Baca/tulis\ntransaksi"]; nodeapi -> views [label="Baca saja"]; views -> postgres [label="Data turunan",style=dashed];
 }

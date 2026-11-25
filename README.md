@@ -1,138 +1,138 @@
-# SIMRS Outpatient — Integrated outpatient care
+# SIMRS Rawat Jalan Terintegrasi
 
-**PT Inova Medika Solusindo · Senior Programmer real case test**  
-**v1.1.0 — Final QA & Release candidate; runtime verification pending**
+**Versi 1.1.0 — Hasil verifikasi lokal, 25 November 2026 (WIB)**
 
-A local demonstration of integrated outpatient care: master data → registration/queue → clinical record/procedures → pharmacy/laboratory → invoice/payment → operational reporting. Six role-specific workspaces; Premium Healthcare SaaS (white sidebar, teal, spacious). Dummy data only. No production deployment or payment gateway.
+Sistem Informasi Manajemen Rumah Sakit (SIMRS) untuk simulasi pelayanan rawat jalan terintegrasi. Aplikasi menghubungkan pengelolaan data master, pendaftaran dan antrean, rekam medis elektronik, tindakan medis, farmasi, laboratorium, penerbitan tagihan, pembayaran, dan pelaporan operasional. Dikembangkan sebagai real case test posisi Senior Programmer PT Inova Medika Solusindo. Seluruh pasien, hasil klinis, dan pembayaran merupakan data dummy. Aplikasi tidak digunakan untuk pelayanan medis nyata.
 
-## Release status
+![Dasbor operasional](docs/evidence/screenshots/01-dashboard-kpi.png)
 
-Source covers the nine functional modules and six technical scenarios. The preceding v1.0.0 was built and tested on the MacBook during UAT (user-provided isolated QA log and screenshots); v1.0.1 through v1.1.0 changes have not been runtime-tested. Dependency-free regression results for this release are in [v1.1.0 static evidence](docs/evidence/v1.1.0-static-checks.txt). See [v1.1.0 release notes](docs/V1.1.0_NOTES.md), [v1.0.4 release notes](docs/V1.0.4_NOTES.md), [v1.0.3 release notes](docs/V1.0.3_NOTES.md), [v1.0.2 release notes](docs/V1.0.2_NOTES.md), [v1.0.1 release notes](docs/V1.0.1_NOTES.md), [UAT backlog](docs/UAT_BACKLOG.md) and [submission gate](docs/SUBMISSION_CHECKLIST.md). Postman execution and release regression evidence remain outstanding.
+## Fitur utama
 
-## Architecture
+| Modul | Kemampuan |
+|---|---|
+| Data master | Pasien, tenaga medis, poli, jadwal dokter, tindakan, obat dan stok, pemeriksaan laboratorium; kode otomatis dan pengelolaan status. |
+| Pendaftaran | Pencarian pasien, jadwal aktif, antrean harian per poli, pencegahan duplikasi. |
+| Rekam medis | Ruang kerja dokter dengan lima tahapan, riwayat klinis, validasi, optimistic locking dan alasan perubahan. |
+| Tindakan medis | Beberapa tindakan, kuantitas, tarif tersimpan dan revisi biaya sebelum pembayaran. |
+| Farmasi | Resep, pemeriksaan stok, penyerahan atomik dan riwayat mutasi. |
+| Laboratorium | Permintaan, pencatatan hasil dan integrasi REST melalui Node.js dengan idempotency. |
+| Tagihan dan pembayaran | Invoice otomatis, pembayaran bertahap, pencegahan pembayaran ganda, bukti pembayaran individual dan cetak A4. |
+| Pelaporan | Grafik kunjungan dan penerimaan, ringkasan tagihan, status pembayaran, rincian berdasarkan periode. |
+| Hak akses | Enam peran pengguna, sesi browser, pengelolaan akun, audit aktivitas. |
+
+## Arsitektur dan teknologi
 
 ```mermaid
 flowchart LR
  R[React :3000] -->|REST bearer| Y[Yii2 :8080]
  R -->|REST bearer| N[Node.js :3001]
- N -->|Auth introspection and lab requests| Y
- Y -->|Core read/write| P[(PostgreSQL 16)]
- N -->|Read-only reporting views| P
+ N -->|Validasi identitas dan permintaan lab| Y
+ Y -->|Baca dan tulis transaksi| P[(PostgreSQL 16)]
+ N -->|Baca view pelaporan| P
 ```
 
-Yii2 is the sole writer of business data. Node validates/integrates lab requests and aggregates reports; it cannot write domain tables. PostgreSQL owns transactional state. React is not authoritative for stock, prices, status or permissions. [Architecture](docs/ARCHITECTURE.md) · [ERD](docs/ERD.md) · [Technical decisions](docs/TECHNICAL_DECISIONS.md).
+Frontend: React, TypeScript, Vite, Ant Design, TanStack Query, React Router, Axios. Backend utama: PHP 8.3 dan Yii2. Layanan pendukung: Node.js 22, Express, TypeScript, Zod. Basis data: PostgreSQL 16. Infrastruktur lokal: Docker Compose. Yii2 merupakan satu-satunya layanan yang menulis data bisnis; Node.js memvalidasi dan meneruskan hasil lab serta membaca view pelaporan dengan hak akses terbatas. Nilai tarif, stok, status dan otorisasi ditentukan server.
 
-## Quick start (macOS / Apple Silicon target)
+## Instalasi lokal
 
-Install and start Docker Desktop (Compose v2), Python 3.9+, Git; internet for first image/package resolution. Free ports 3000, 3001, 8080. Extract ZIP, `cd simrs-outpatient`.
-
-**Recommended first: isolated QA with a retained dummy environment** (does not use your normal database):
+Siapkan Docker Desktop (Compose v2 atau kompatibel), Git dan Python 3.9+. Koneksi internet dibutuhkan untuk pengunduhan image dan dependency pertama. Pastikan port 3000, 3001 dan 8080 tersedia. Clone repository ini atau ekstrak paket source, lalu masuk ke direktori `simrs-outpatient`.
 
 ```bash
-python3 scripts/qa-runtime.py --dry-run --outage
-python3 scripts/qa-runtime.py --outage --keep
-```
-
-The runner prints an isolated workdir and cleanup command; use the printed workdir for its `.env` and demo prefix. Logs/summary are in `qa-results/` in the original project. Do not start a second stack on the same ports. Without `--keep`, only the isolated QA stack is removed. See [testing](docs/TESTING.md).
-
-**Alternatively run the ordinary local demo:**
-
-```bash
-./scripts/setup-env.sh
+bash scripts/setup-env.sh
 docker compose config --quiet
 docker compose up --build -d
 docker compose ps -a
 docker compose logs migrate
 ```
 
-`migrate` should exit 0 after applying all four Yii migrations and seed. Open [frontend](http://localhost:3000), [Core health](http://localhost:8080/api/v1/health), [Node health](http://localhost:3001/api/v1/health). Use localhost, not a different browser origin; PostgreSQL is internal only. Never manually apply schema.sql in addition to migrations.
+Layanan `migrate` pada instalasi baru harus selesai dengan kode 0 setelah menerapkan empat migration Yii dan mengisi data dummy. Jangan menjalankan `database/schema.sql` secara terpisah setelah migration. Gunakan alamat `localhost` agar origin browser sesuai konfigurasi.
 
-| Username | Password pattern | Landing |
-|---|---|---|
-| admin | `<prefix>-admin` | /dashboard |
-| registration | `<prefix>-registration` | /registration |
-| doctor | `<prefix>-doctor` | /doctor |
-| pharmacy | `<prefix>-pharmacy` | /pharmacy |
-| laboratory | `<prefix>-laboratory` | /laboratory |
-| cashier | `<prefix>-cashier` | /billing |
-
-`grep '^DEMO_PASSWORD_PREFIX=' .env` locally (in the retained QA workdir if applicable). Keep this secret out of screenshots, logs and Git. Seed does not overwrite existing accounts. Bearer token lives in memory; a scoped HttpOnly cookie restores the same unexpired session after refresh. There is no sliding expiry or long-lived refresh token. Logout revokes tokens for the authenticated user; a mismatched newer cookie from another account is preserved. Browser generation markers coordinate tabs (not credentials); if the server is unreachable, revocation is not confirmed. Use separate browser profiles for separate simultaneous role sessions.
-
-## Updating an existing UAT database
-
-Follow [the cumulative non-destructive upgrade guide](docs/UPGRADE_V1.1.0.md) and [targeted release UAT](docs/FINAL_UAT.md). Only the v1.0.1 migration 000004 is new relative to v1.0.0; do not reseed existing data. Keep the original `.env`, Compose project name and volume. Do not run `down -v`, reset seed data or blindly replace locally patched files.
-
-## Run and evaluate
-
-1. [Demo walkthrough](docs/DEMO_WALKTHROUGH.md): one fresh dummy visit, four charge categories, partial and final payment, dashboard.
-2. [Testing guide](docs/TESTING.md): policy checks, isolated integration runner, database invariants, Postman, query plans and manual QA.
-3. [Postman guide](postman/README.md): import environment, end-to-end workflow collection and focused collections. Actual Postman evidence must be captured locally.
-4. [Submission checklist](docs/SUBMISSION_CHECKLIST.md) and [Git guide](docs/GITHUB_SETUP.md): capture authentic evidence, scrub secrets, publish accessible repository and submit.
-
-## Repository map
-
-| Path | Purpose |
+| Layanan | Alamat |
 |---|---|
-| frontend/ | React + TypeScript, Ant Design theme, protected workspaces |
-| backend-yii/ | Yii2 REST core, services, policies, migrations and PHP tests |
-| backend-node/ | Express REST integration/reporting, Zod/auth middleware |
-| database/ | Baseline schema and init permissions |
-| scripts/ | Static checks, integration tests, isolated QA runner |
-| postman/ | API collections and local environment template |
-| docs/ | Technical documentation, traceability, QA and actual static logs |
+| Aplikasi | http://localhost:3000 |
+| Kesehatan Yii2 | http://localhost:8080/api/v1/health |
+| Kesehatan Node.js | http://localhost:3001/api/v1/health |
+| PostgreSQL | Port 5432 internal Docker, tidak dipublikasikan |
 
-## Documentation index
+## Akun demonstrasi
 
-[Assignment traceability](docs/TRACEABILITY.md) · [Requirements](docs/REQUIREMENTS.md) · [REST API](docs/API.md) · [RBAC](docs/RBAC.md) · [Workflow](docs/WORKFLOW.md) · [Database/ERD](docs/ERD.md) · [Design specification](docs/UI_UX_SPECIFICATION.md) · [Test cases](docs/TEST_CASES.md) · [Interview guide](docs/INTERVIEW_GUIDE.md) · [Release notes](docs/PHASE10_NOTES.md).
+Lihat awalan kata sandi yang dihasilkan secara lokal:
 
-## Troubleshooting and dependency reproducibility
+```bash
+grep '^DEMO_PASSWORD_PREFIX=' .env
+```
+
+| Nama pengguna | Pola kata sandi | Halaman awal |
+|---|---|---|
+| `admin` | `<prefix>-admin` | `/dashboard` |
+| `registration` | `<prefix>-registration` | `/registration` |
+| `doctor` | `<prefix>-doctor` | `/doctor` |
+| `pharmacy` | `<prefix>-pharmacy` | `/pharmacy` |
+| `laboratory` | `<prefix>-laboratory` | `/laboratory` |
+| `cashier` | `<prefix>-cashier` | `/billing` |
+
+Ganti `<prefix>` dengan nilai lokal tanpa tanda kurung sudut. Jangan membagikan `.env`, awalan kata sandi atau JWT. Seed tidak menimpa akun yang sudah ada. Token berada di memori; cookie HttpOnly memulihkan sesi yang sama selama belum kedaluwarsa. Logout mencabut sesi akun tersebut melalui `token_version`; tidak ada refresh token jangka panjang. Gunakan profil browser berbeda untuk menjalankan beberapa peran secara bersamaan.
+
+## Demonstrasi dan hasil pengujian
+
+Alur utama: pendaftaran → pemeriksaan dokter → laboratorium/farmasi → invoice → pembayaran sebagian → lunas → pelaporan. Lihat [panduan demonstrasi](docs/DEMO_WALKTHROUGH.md).
+
+Pengujian aktual dilakukan pada MacBook Apple Silicon M1, Docker Compose dan PostgreSQL 16 tanggal 25 November 2026. Source aktual mempertahankan perbaikan lokal `Yii\db\JsonExpression` untuk JSONB.
+
+| Pemeriksaan | Hasil |
+|---|---|
+| Build seluruh layanan Docker dan pengujian paket React/Node.js | Lulus |
+| Migration 000004 dan fingerprint 23 tabel bisnis | Lulus; identik sebelum/sesudah |
+| UAT terarah | 7/7 kelompok alur utama lulus berdasarkan bukti dan konfirmasi pengguna |
+| Pengujian integrasi HTTP terisolasi | 844 pemeriksaan lulus |
+| Pengujian kebijakan PHP | 656 assertion lulus |
+| Regression statis | 1.554 assertion lulus (termasuk PHP) |
+| Postman Collection melalui Newman | 51/51 request, 133/133 assertion; exit code 0 |
+| Invariant basis data | 10/10 sebelum dan sesudah gangguan |
+| Gangguan Node.js dan pemulihan | Lulus |
+| Rollback dan penerapan ulang migration | Lulus pada basis data QA terisolasi |
+
+Bukti: [indeks bukti aktual](docs/evidence/FINAL_RUNTIME_EVIDENCE.md), [tangkapan layar](docs/evidence/screenshots/), [invoice dan kuitansi](docs/evidence/billing/), [log QA terpilih](docs/evidence/automated-qa/runtime-excerpts.txt), [hasil Newman](docs/evidence/postman/newman-summary.txt), [laporan JSON Newman](docs/evidence/postman/newman-result.json), [log statis](docs/evidence/v1.1.0-static-checks.txt). Jumlah assertion bukan persentase cakupan pengujian. Pengujian responsif terperinci, audit dependency, dan pengujian beban produksi belum terbukti lengkap.
+
+## Menjalankan ulang pengujian
+
+Hentikan stack utama tanpa menghapus volume agar port tersedia, lalu jalankan QA pada basis data dummy terisolasi:
+
+```bash
+python3 scripts/qa-runtime.py --dry-run --outage
+python3 scripts/qa-runtime.py --outage --keep
+```
+
+Runner mencetak direktori dan nama proyek QA, serta perintah pembersihan khusus. Hasil mentah berada di `qa-results/` dan harus tetap privat. `--keep` mempertahankan stack untuk Newman/Postman. Tanpa opsi tersebut hanya stack QA yang dibersihkan. Jangan menjalankan smoke test mutasi terhadap data utama. Lihat [panduan pengujian](docs/TESTING.md) dan [panduan Postman/Newman](postman/README.md).
+
+## Struktur repository
+
+| Direktori | Isi |
+|---|---|
+| `frontend/` | Antarmuka React, komponen bersama, routing dan pengujian helper. |
+| `backend-yii/` | REST API utama, layanan domain, kebijakan, migration dan pengujian PHP. |
+| `backend-node/` | Integrasi laboratorium, pelaporan, middleware dan pengujian Node.js. |
+| `database/` | Schema awal dan inisialisasi hak akses. |
+| `scripts/` | Pengujian statis, integrasi, pemeriksaan SQL dan runner QA. |
+| `postman/` | Koleksi REST API dan template environment. |
+| `docs/` | Dokumentasi teknis dan bukti pengujian. |
+
+## Dokumentasi
+
+- [Persyaratan](docs/REQUIREMENTS.md) dan [pemetaan persyaratan](docs/TRACEABILITY.md)
+- [Arsitektur](docs/ARCHITECTURE.md), [ERD](docs/ERD.md), [keputusan teknis](docs/TECHNICAL_DECISIONS.md)
+- [Kontrak REST API](docs/API.md), [RBAC](docs/RBAC.md), [alur transaksi](docs/WORKFLOW.md)
+- [Spesifikasi UI/UX](docs/UI_UX_SPECIFICATION.md), [skenario pengujian](docs/TEST_CASES.md), [UAT final](docs/FINAL_UAT.md)
+- [Catatan rilis v1.1.0](docs/V1.1.0_NOTES.md), [backlog UAT](docs/UAT_BACKLOG.md), [daftar periksa pengumpulan](docs/SUBMISSION_CHECKLIST.md)
+
+## Pemeliharaan dan batasan
+
+Untuk upgrade basis data existing, ikuti [panduan upgrade](docs/UPGRADE_V1.1.0.md); pertahankan `.env`, nama proyek dan volume. Hanya migration 000004 yang baru dibanding v1.0.0. Jangan seed ulang atau menggunakan `docker compose down -v` pada data yang ingin dipertahankan.
 
 ```bash
 docker compose ps -a
 docker compose logs --tail=100 db migrate yii node frontend
+docker compose down
 ```
 
-Keep original `.env` and volume when upgrading. For an existing UAT database use the migration-only command and no-deps startup in the upgrade guide; do not run the default migrate+seed command. Normal stop: `docker compose down` (retains DB). **Never use `down -v` on data you need.** Use the runner's explicit isolated cleanup command only for its dummy project.
-
-No package lockfiles were available from prior phases. Resolve them locally using `npm install` in both JS projects and `composer install` in backend-yii (PHP 8.3 plus required extensions); commit actual lockfiles, switch npm Dockerfiles to `npm ci`, rebuild and rerun tests. Review `npm audit` and `composer audit`; do not blindly force upgrades. No vulnerability scan or dependency build is claimed here. No actual Git remote or deployment has been created. Do not use real patient or payment data.
-
-## Final Runtime Verification
-
-Release: v1.1.0
-Test date: 25 November 2026
-Environment: macOS, Apple Silicon M1, Docker Compose, PostgreSQL 16
-
-| Verification | Result |
-|---|---|
-| Docker production build | PASS |
-| Database migration | PASS |
-| Existing database preservation | 23 tables verified |
-| Targeted browser UAT | 7/7 groups PASS |
-| Automated integration testing | 844 HTTP checks PASS |
-| PHP policy regression | 656 assertions PASS |
-| Static regression | 1,554 assertions PASS |
-| Postman Collection via Newman | 51/51 requests PASS |
-| Newman assertions | 133/133 PASS |
-| Database invariants | 10/10 PASS |
-| Node.js outage and recovery | PASS |
-| Migration rollback and reapply | PASS |
-
-### Evidence
-
-- [Final runtime evidence](docs/evidence/FINAL_RUNTIME_EVIDENCE.md)
-- [Application screenshots](docs/evidence/screenshots/)
-- [Invoice and payment receipts](docs/evidence/billing/)
-- [Automated integration results](docs/evidence/automated-qa/)
-- [Postman execution summary](docs/evidence/postman/newman-summary.txt)
-- [Newman JSON report](docs/evidence/postman/newman-result.json)
-
-### Known Limitations
-
-- All patient data and payments are simulated.
-- Payments do not use a real payment gateway.
-- Registration supports same-day visits.
-- Future booking and practice-hour warnings are deferred.
-- Performance checks use a small dummy dataset, not production-scale load testing.
-- This release has not undergone an independent security audit.
-- Clinical JSONB persistence retains the runtime-verified Yii JsonExpression implementation.
-
+Pendaftaran hanya hari yang sama (WIB); booking tanggal mendatang dan peringatan di luar jam praktik ditunda. Pembayaran non-tunai merupakan simulasi, bukan payment gateway. Tidak ada rawat inap, BPJS, SATUSEHAT, retur/refund, atau jaminan pengiriman offline yang tahan gangguan. Hasil query menggunakan dataset kecil, bukan SLA produksi. Dependency lockfile belum tersedia pada commit awal; audit dependency dan security audit independen belum dilakukan. Sebelum penerapan nyata diperlukan TLS, pengelolaan rahasia, monitoring, backup/restore teruji, pengujian beban, dan evaluasi keamanan serta kepatuhan. Jangan gunakan data pasien asli.

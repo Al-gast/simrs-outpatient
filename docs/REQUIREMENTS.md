@@ -1,30 +1,26 @@
-# Requirements & acceptance criteria
+# Persyaratan dan kriteria penerimaan
 
-Source mapping: original PDF sections B (modules), C (Node), D (technical cases), E (stack), F (outputs), G (dummy data). All rows below are planned, not implemented. UI and API must demonstrate the workflow with six demo users.
+Pemetaan berasal dari studi kasus: B modul, C Node, D enam kasus teknis, E teknologi, F keluaran, G data dummy. Kriteria berikut adalah spesifikasi; status hasil aktual dilaporkan terpisah di bukti pengujian.
 
-| ID / source | Functional scope | Acceptance criteria |
+| ID / bagian | Cakupan | Kriteria |
 |---|---|---|
-| R01 / B1 | Patients, doctors/medical staff, clinics, schedules, procedures, medicines; lab test master added for pricing | Create/list/update/deactivate or delete unreferenced master records; search/filter/paginate; required values validated; duplicate MRN, identity if provided and master codes rejected; stock/price nonnegative. History remains readable. |
-| R02 / B2 | Patient registration & queue | Search MRN/identity/name; choose active clinic/doctor/schedule on current local date; server generates next queue; list queue status and patient visit history; simultaneous duplicate visits yield one visit. |
-| R03 / B3 | EMR | Assigned doctor sees queue, records complaint, anamnesis, vitals, physical exam, primary and multiple secondary diagnoses; history is retrievable; changes versioned and audited. |
-| R04 / B4 | Medical procedures | Multiple procedures and quantities per visit; server snapshots tariffs; invoice includes all committed procedure lines. |
-| R05 / B5 | Pharmacy | Create prescription with dosage, frequency, quantity; validate stock at prescription and again on dispense; stock unchanged before dispense; all-or-nothing dispense with movements; repeated requests do not reduce stock twice; history available. |
-| R06 / B6 | Lab | Doctor requests one or more tests; lab staff list orders and enter results; doctor can see results in visit history; Node integration supports read and result submission through Yii. |
-| R07 / B7 | Billing | Server generates one invoice with registration, procedure, completed lab and dispensed medicines; cash/non-cash simulation, partial payment, unpaid/partial/paid status; reject overpayment and duplicate transaction; list patient payment history; print invoice and per-payment receipt. |
-| R08 / B8 | Dashboard | Node API returns visit count, counts per clinic, procedure quantity, collected revenue, medicine usage, invoice payment statuses; inclusive local-date filters and drill-down paginated details. |
-| R09 / B9 | Auth | Six roles; login/logout; role-specific UI and server permission checks; assigned-doctor scope; invalid or revoked token rejected. Admin manages users. |
-| R10 / C | Node service | REST lab + dashboard endpoints, authentication and Zod validation, consistent JSON errors and docs; no core writes from Node. |
-| R11 / D1–D6 | Technical problems | Concurrency, idempotency, audit, integration failure and performance evidence; see test plan and workflow. |
-| R12 / E–G | Delivery | Three sources, accessible Git repo, schema/ERD/migration, architecture/API/setup/decisions, actual screenshots, invoice/receipt, Postman evidence and critical tests; dummy data only. |
+| R01/B1 | Master pasien, tenaga medis, poli, jadwal, tindakan, obat dan lab | CRUD, pencarian, filter, validasi, pagination, kode unik, histori terlindungi, penyesuaian stok. |
+| R02/B2 | Pendaftaran dan antrean | Pilih pasien, poli, dokter/jadwal aktif; nomor antrean harian, cegah duplikasi, status pelayanan. |
+| R03/B3 | Rekam medis elektronik | Keluhan/anamnesis, vital, pemeriksaan fisik, diagnosis utama/sekunder, histori, versi dan audit. |
+| R04/B4 | Tindakan | Beberapa tindakan/kuantitas dengan snapshot tarif dan komponen invoice. |
+| R05/B5 | Farmasi | Resep dosis/frekuensi/jumlah, cek stok saat simpan dan serah, pengurangan atomik sekali, histori. |
+| R06/B6 | Lab | Permintaan multi-item, input hasil, hasil tampil bagi dokter, REST Node melalui Yii. |
+| R07/B7 | Billing | Invoice empat kategori, pembayaran simulasi tunai/non-tunai, sebagian/lunas, cegah overpayment/duplikat, cetak invoice dan kuitansi individual. |
+| R08/B8 | Dashboard | Kunjungan, per poli, tindakan, penerimaan, obat, status bayar; periode dan rincian. |
+| R09/B9 | Autentikasi | Enam role, login/logout, otorisasi backend, scope dokter, token dicabut ditolak, kelola akun. |
+| R10/C | Node.js | Integrasi lab, reporting, middleware autentikasi dan validasi, error JSON dan dokumentasi; tanpa tulis tabel inti. |
+| R11/D1–D6 | Kasus teknis | Concurrency, idempotency, audit, gangguan integrasi, bukti performa. |
+| R12/E–G | Pengumpulan | Tiga source, Git dapat diakses, schema/ERD/migration, arsitektur/API/instalasi/keputusan, tangkapan layar aktual, invoice/kuitansi, bukti Postman dan pengujian kritis; data dummy. |
 
-## Non-functional goals (proposed)
+## Sasaran nonfungsional
 
-- Correctness first: database constraints and transactions supplement request validation.
-- Security: backend RBAC, least privilege, parameterized SQL, password hashing, no patient data or credentials in logs. No real patient data.
-- Maintainability: thin controllers, domain services, shared response shape, migration history; no duplicated transaction logic.
-- Usability: consistent navigation, Indonesian labels, clear pending/loading/error/empty states, print layout.
-- Performance: indexed filters, bounded pages, aggregate queries, no per-row query loops; measure before asserting latency.
+Correctness: constraint dan transaksi melengkapi validasi. Keamanan: RBAC backend, least privilege, SQL berparameter, hash password, tanpa data asli dan rahasia pada log. Maintainability: controller tipis, service domain, kontrak response konsisten, migration terurut. Usability: label Indonesia, navigasi konsisten, status loading/error/empty dan cetak. Performa: indeks, pagination terbatas, agregasi, hindari N+1; ukur sebelum menyatakan latensi.
 
-## Out of scope / limitations
+## Batasan
 
-Inpatient, insurance/BPJS, SATUSEHAT, real payments, real lab devices, multi-facility, advanced inventory batches/expiry, ICD catalog (free-text diagnosis), cancellations/refunds and post-payment financial adjustment UI. One outpatient visit per patient per clinic per local date, one prescription per visit, one invoice per visit. A hospital may allow repeat visits and more complex workflows; those are deliberately not modeled. Zero-total invoices are supported and close without payment. Export PDF is optional; browser print is required. No deployment requirement in PDF.
+Di luar cakupan: rawat inap, BPJS/asuransi, SATUSEHAT, pembayaran dan perangkat lab nyata, multi-fasilitas, batch/expiry inventory, katalog ICD (diagnosis free text), pembatalan/refund dan perubahan finansial pascapembayaran. Satu kunjungan per pasien/poli/tanggal lokal, satu resep dan invoice per kunjungan; total nol dapat selesai tanpa pembayaran. Cetak browser mendukung PDF. Deployment publik tidak diwajibkan. Lihat [pemetaan](TRACEABILITY.md) dan [bukti aktual](evidence/FINAL_RUNTIME_EVIDENCE.md).
